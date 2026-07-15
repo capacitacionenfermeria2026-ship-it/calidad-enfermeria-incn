@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INCN - Sistema de Indicadores de Calidad de Enfermería</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* ===== ESTILOS INSTITUCIONALES (DISEÑO HERMOSO) ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; background: linear-gradient(135deg, #0a2a4a 0%, #1a4a7a 50%, #2c6ca0 100%); display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-wrapper { width: 100%; max-width: 480px; margin: 0 auto; }
+        .login-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 30px; padding: 40px 35px 30px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2); transition: transform 0.3s ease; }
+        .login-card:hover { transform: translateY(-5px); }
+        .logo-container { text-align: center; margin-bottom: 25px; }
+        .logo-icon { font-size: 4rem; color: #1a4a7a; background: rgba(26, 74, 122, 0.1); width: 90px; height: 90px; line-height: 90px; border-radius: 50%; margin: 0 auto 12px; display: inline-block; }
+        .institucion { font-size: 0.85rem; font-weight: 700; color: #1a4a7a; letter-spacing: 1px; text-transform: uppercase; }
+        .departamento { font-size: 0.75rem; font-weight: 600; color: #4a6a8a; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .sistema-nombre { font-size: 1.6rem; font-weight: 700; color: #0a2a4a; line-height: 1.2; }
+        .sistema-sub { font-size: 0.9rem; color: #4a6a8a; }
+        .divider-line { height: 3px; width: 60px; background: linear-gradient(90deg, #1a4a7a, #4a8ab0); margin: 12px auto 18px; border-radius: 10px; }
+        .status-bar { display: flex; justify-content: space-between; align-items: center; background: #f0f4f9; padding: 8px 16px; border-radius: 30px; margin-bottom: 20px; font-size: 0.8rem; color: #2a4a6a; }
+        .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
+        .status-dot.online { background: #28a745; }
+        .status-dot.offline { background: #dc3545; }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+        .version { font-weight: 500; color: #4a6a8a; }
+        .form-label-custom { font-weight: 600; color: #0a2a4a; font-size: 0.9rem; }
+        .input-group-custom { border-radius: 30px; overflow: hidden; border: 2px solid #dce4ec; transition: border-color 0.3s, box-shadow 0.3s; background: white; }
+        .input-group-custom:focus-within { border-color: #1a4a7a; box-shadow: 0 0 0 4px rgba(26, 74, 122, 0.15); }
+        .input-group-custom .input-group-text { background: transparent; border: none; color: #4a6a8a; padding-left: 16px; font-size: 1.1rem; }
+        .input-group-custom .form-control { border: none; padding: 12px 16px 12px 8px; font-size: 1rem; background: transparent; box-shadow: none !important; }
+        .input-group-custom .form-control::placeholder { color: #aab8c8; }
+        .btn-ingresar { width: 100%; padding: 14px; border-radius: 30px; font-weight: 700; font-size: 1.1rem; background: linear-gradient(135deg, #1a4a7a, #2c6ca0); border: none; color: white; transition: all 0.3s ease; letter-spacing: 0.5px; margin-top: 8px; }
+        .btn-ingresar:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26, 74, 122, 0.4); background: linear-gradient(135deg, #0a3a6a, #1a5a8a); }
+        .footer { text-align: center; margin-top: 20px; font-size: 0.7rem; color: rgba(255, 255, 255, 0.6); border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 15px; }
+        .footer-inner { max-width: 480px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .alert-custom { border-radius: 30px; padding: 10px 18px; font-size: 0.85rem; background: #f8d7da; color: #721c24; border: none; margin-top: 12px; display: none; align-items: center; gap: 10px; }
+        .alert-custom.show { display: flex; }
+        .bg-decoration { position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.03) 0%, transparent 60%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.03) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+        .login-wrapper { position: relative; z-index: 1; }
+        @media (max-width: 576px) { .login-card { padding: 30px 20px 25px; } .sistema-nombre { font-size: 1.3rem; } .logo-icon { font-size: 3rem; width: 75px; height: 75px; line-height: 75px; } }
+    </style>
+</head>
+<body>
+    <div class="bg-decoration"></div>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="logo-container">
+                <div class="logo-icon"><i class="fas fa-heartbeat"></i></div>
+                <div class="institucion">Instituto Nacional de Ciencias Neurológicas</div>
+                <div class="departamento">Departamento de Enfermería</div>
+                <div class="sistema-nombre">Sistema de Indicadores<br>de Calidad de Enfermería</div>
+                <div class="sistema-sub">Monitoreo en tiempo real</div>
+                <div class="divider-line"></div>
+            </div>
+            <div class="status-bar">
+                <span><span class="status-dot online" id="statusDot"></span><span id="statusText">Conectando...</span></span>
+                <span class="version"><i class="far fa-clock me-1"></i> <span id="clockDisplay"></span></span>
+            </div>
+            <form id="loginForm" autocomplete="off">
+                <div class="mb-3">
+                    <label for="codigoInput" class="form-label-custom"><i class="fas fa-id-card me-1"></i> Código de acceso</label>
+                    <div class="input-group-custom d-flex align-items-center">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" class="form-control" id="codigoInput" placeholder="Ej: SJ, UCI, EMG" required autofocus>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="passwordInput" class="form-label-custom"><i class="fas fa-lock me-1"></i> Contraseña</label>
+                    <div class="input-group-custom d-flex align-items-center">
+                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                        <input type="password" class="form-control" id="passwordInput" placeholder="••••••" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-ingresar"><i class="fas fa-sign-in-alt me-2"></i> Ingresar</button>
+                <div id="errorMessage" class="alert-custom">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="errorText">Credenciales incorrectas. Intente nuevamente.</span>
+                </div>
+            </form>
+        </div>
+        <div class="footer">
+            <div class="footer-inner">
+                <span>Versión 1.0</span>
+                <span>Departamento de Enfermería – INCN</span>
+                <span>Lima - Perú</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ================================================================
+        // CONFIGURACIÓN SUPABASE
+        // ================================================================
+        const SUPABASE_URL = 'https://hdhqzawcylkvttsqqjty.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_x5r7hUrN2pzVexbtZ_b0Wg_OBDEMAKP';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ================================================================
+        // TABLA DE USUARIOS (JEF apunta a Jefatura.html)
+        // ================================================================
+        const USERS = {
+            'SJ': { password: 'SJ2026', file: 'SalaSanJose.html' },
+            'SL': { password: 'SL2026', file: 'SalaSanLuis.html' },
+            'SV': { password: 'SV2026', file: 'SalaSanVicente.html' },
+            'INM': { password: 'INM2026', file: 'SalaInmaculada.html' },
+            'STA': { password: 'STA2026', file: 'SalaSantaAna.html' },
+            'LV': { password: 'LV2026', file: 'SalaLaVirgen.html' },
+            'JM': { password: 'JM2026', file: 'SalaJesusMaria.html' },
+            'ER': { password: 'ER2026', file: 'SalaElRosario.html' },
+            'CJ': { password: 'CJ2026', file: 'SalaCorazonDeJesus.html' },
+            'SM': { password: 'SM2026', file: 'SalaSanMiguel.html' },
+            'UCI': { password: 'UCI2026', file: 'UnidadUCI.html' },
+            'UCIN': { password: 'UCIN2026', file: 'UnidadUCIN.html' },
+            'EMG': { password: 'EMG2026', file: 'Emergencia.html' },
+            'JEF': { password: 'JEF2026', file: 'Jefatura.html' }  // ✅ NUEVO NOMBRE
+        };
+
+        // ================================================================
+        // RELOJ
+        // ================================================================
+        function updateClock() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('clockDisplay').textContent = `${dateStr} ${timeStr}`;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // ================================================================
+        // VERIFICAR CONEXIÓN A SUPABASE
+        // ================================================================
+        async function checkSupabaseConnection() {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            try {
+                const { data, error } = await supabaseClient.from('REGISTROS').select('count', { count: 'exact', head: true });
+                if (error) throw error;
+                dot.className = 'status-dot online';
+                text.textContent = 'Sistema conectado';
+            } catch (e) {
+                dot.className = 'status-dot offline';
+                text.textContent = 'Sin conexión a la nube';
+                console.error('Error de conexión:', e);
+            }
+        }
+        checkSupabaseConnection();
+        setInterval(checkSupabaseConnection, 30000);
+
+        // ================================================================
+        // MANEJO DEL LOGIN
+        // ================================================================
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const codigo = document.getElementById('codigoInput').value.trim().toUpperCase();
+            const password = document.getElementById('passwordInput').value.trim();
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            errorDiv.classList.remove('show');
+
+            if (!codigo || !password) {
+                errorText.textContent = 'Por favor, complete ambos campos.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            const user = USERS[codigo];
+            if (!user) {
+                errorText.textContent = `Código "${codigo}" no registrado. Códigos disponibles: ${Object.keys(USERS).join(', ')}`;
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            if (user.password !== password) {
+                errorText.textContent = 'Contraseña incorrecta. Intente nuevamente.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            // ✅ Credenciales correctas → redirigir
+            const destino = user.file;
+            console.log(`🔐 Acceso concedido para ${codigo} → ${destino}`);
+            window.location.href = destino;
+        });
+    </script>
+</body>
+</html>

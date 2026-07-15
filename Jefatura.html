@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard General - Calidad Enfermería</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { background: #f4f8fc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .navbar-custom { background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 12px 0; }
+    .navbar-brand { font-weight: 700; font-size: 1.5rem; color: #0a3d62 !important; }
+    .navbar-brand i { color: #2c7da0; }
+    .badge-ward { background: #2c7da0; color: white; padding: 8px 20px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; }
+    .card { border: none; border-radius: 18px; box-shadow: 0 8px 25px rgba(0,0,0,0.04); margin-bottom: 24px; background: white; }
+    .card-header { background: white; border-bottom: 2px solid #eef2f7; font-weight: 600; color: #0a3d62; padding: 16px 20px; border-radius: 18px 18px 0 0 !important; }
+    .card-header i { color: #2c7da0; margin-right: 8px; }
+    .kpi-card { background: white; border-radius: 14px; padding: 18px 20px; border-left: 6px solid #0a3d62; box-shadow: 0 4px 12px rgba(0,0,0,0.02); height: 100%; }
+    .kpi-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; font-weight: 600; }
+    .kpi-value { font-size: 2rem; font-weight: 700; color: #0a3d62; line-height: 1.2; }
+    .kpi-unit { font-size: 1rem; color: #6c757d; margin-left: 4px; }
+    .table-general th { background: #0a3d62; color: white; font-weight: 500; font-size: 0.8rem; text-align: center; vertical-align: middle; white-space: nowrap; }
+    .table-general td { text-align: center; vertical-align: middle; font-size: 0.85rem; padding: 6px 4px; }
+    .table-general tr:nth-child(even) { background: #f9fcff; }
+    .status-green { background-color: #d4edda; color: #155724; font-weight: bold; }
+    .status-yellow { background-color: #fff3cd; color: #856404; font-weight: bold; }
+    .status-red { background-color: #f8d7da; color: #721c24; font-weight: bold; }
+    .chart-container { position: relative; height: 350px; width: 100%; }
+    .form-select-sm { border-radius: 30px; border: 1px solid #dce4ec; padding: 6px 20px; }
+    .table-responsive { overflow-x: auto; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar-custom">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span class="navbar-brand"><i class="fas fa-heartbeat me-2"></i>Calidad Enfermería</span>
+    <span class="badge-ward"><i class="fas fa-chart-pie me-1"></i> Dashboard General</span>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <div class="alert alert-info">
+    <i class="fas fa-database me-2"></i> Consolidado de <strong>todas las salas</strong> – Datos en tiempo real desde la nube.
+  </div>
+
+  <!-- Filtros -->
+  <div class="row mb-4 align-items-end">
+    <div class="col-md-4">
+      <label class="fw-bold"><i class="fas fa-calendar-alt me-2"></i>Mes:</label>
+      <select id="monthSelector" class="form-select form-select-sm" onchange="cargarDashboard(this.value)">
+        <option value="">Cargando...</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="fw-bold"><i class="fas fa-chart-bar me-2"></i>Indicador para gráfico:</label>
+      <select id="chartIndicatorSelect" class="form-select form-select-sm" onchange="actualizarGrafico()">
+        <option value="">Cargando indicadores...</option>
+      </select>
+    </div>
+    <div class="col-md-4 text-end">
+      <span class="badge bg-success me-1"><i class="fas fa-circle"></i> Verde: ≥90%</span>
+      <span class="badge bg-warning text-dark me-1"><i class="fas fa-circle"></i> Amarillo: 70-89%</span>
+      <span class="badge bg-danger"><i class="fas fa-circle"></i> Rojo: &lt;70%</span>
+    </div>
+  </div>
+
+  <!-- KPIs Globales -->
+  <div id="kpisGlobales" class="row g-3 mb-4"></div>
+
+  <!-- Gráfico -->
+  <div class="card">
+    <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Comparativa de indicadores por sala (todas las salas)</div>
+    <div class="card-body">
+      <div class="chart-container"><canvas id="chartGeneral"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Tabla completa con semáforos -->
+  <div class="card">
+    <div class="card-header"><i class="fas fa-table me-2"></i>Indicadores detallados por sala (con semáforos)</div>
+    <div class="card-body" id="tablaSalas" style="overflow-x:auto;">
+      <p class="text-muted">Cargando datos...</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // ================================================================
+  // CONFIGURACIÓN SUPABASE
+  // ================================================================
+  const SUPABASE_URL = 'https://hdhqzawcylkvttsqqjty.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_x5r7hUrN2pzVexbtZ_b0Wg_OBDEMAKP';
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ================================================================
+  // LISTA DE TODAS LAS SALAS (actualiza aquí si agregas más)
+  // ================================================================
+  const SALAS = [
+    'Sala San Jose',
+    'Sala San Luis',
+    'Sala San Vicente',
+    'Sala Inmaculada',
+    'Sala Santa Ana',
+    'Sala La Virgen',
+    'Sala Jesus Maria',
+    'Sala El Rosario',
+    'Sala Corazon de Jesus',
+    'Sala San Miguel',
+    'Unidad UCI',
+    'Unidad UCIN',
+    'Emergencia'
+  ];
+
+  // ================================================================
+  // CONFIGURACIÓN DE INDICADORES EXTRAS (todos los posibles)
+  // ================================================================
+  const EXTRA_INDICATORS = {
+    'wells': { label: 'Wells (TVP)', numerator: 'wellsApplied', denominator: 'wellsTotal', format: 'percent' },
+    'dysphagia': { label: 'Test Disfagia', numerator: 'dysphagiaApplied', denominator: 'dysphagiaTotal', format: 'percent' },
+    'aspiration': { label: 'Riesgo Aspiración', numerator: 'aspirationRisk', denominator: 'aspirationTotal', format: 'percent' },
+    'surgery': { label: 'Cirugías Programadas', numerator: 'surgeryDone', denominator: 'surgeryTotal', format: 'percent' },
+    'raCvc': { label: 'Retiro CVC/CVP', numerator: 'raCvc', denominator: 'pacCvc', format: 'percent' },
+    'raTet': { label: 'Retiro TET', numerator: 'raTet', denominator: 'pacTet', format: 'percent' },
+    'raSng': { label: 'Retiro SNG', numerator: 'raSng', denominator: 'pacSng', format: 'percent' },
+    'raCup': { label: 'Retiro CUP', numerator: 'raCup', denominator: 'pacCup', format: 'percent' },
+    'sedation': { label: 'Sedación evaluada', numerator: 'sedationEvaluated', denominator: 'sedationTotal', format: 'percent' },
+    'pic': { label: 'PIC vigilada', numerator: 'picRegistered', denominator: 'picTotal', format: 'percent' },
+    'vap': { label: 'Tasa VAP (x1000)', numerator: 'vapCases', denominator: 'vmDays', format: 'rate' },
+    'glasgow': { label: 'Glasgow completo', numerator: 'glasgowComplete', denominator: 'glasgowTotal', format: 'percent' },
+    'triage': { label: 'Tiempo Triaje (min)', numerator: 'timeTriageSum', denominator: 'patientsTriaged', format: 'avg' },
+    'thrombolysis': { label: 'Tiempo Trombólisis', numerator: 'timeThrombolysisSum', denominator: 'thrombolysedPatients', format: 'avg' },
+    'obs': { label: 'Tiempo Observación', numerator: 'obsStaySum', denominator: 'obsPatients', format: 'avg' },
+    'emergencyFalls': { label: 'Caídas Emergencia', numerator: 'emergencyFalls', denominator: 'emergencyTotalPatients', format: 'percent' },
+    'relPacEnf': { label: 'Pac/Enfermera', numerator: 'patientsAttended', denominator: 'nursesScheduled', format: 'ratio' },
+  };
+
+  // ================================================================
+  // OBTENER TODOS LOS REGISTROS
+  // ================================================================
+  async function getData() {
+    const { data, error } = await supabaseClient
+      .from("REGISTROS")
+      .select("*")
+      .order("date", { ascending: true });
+    if (error) { console.error(error); return []; }
+    return data.map(row => ({ ...row.data, ward: row.ward, date: row.date }));
+  }
+
+  // ================================================================
+  // FUNCIÓN PARA CALCULAR MÉTRICAS POR SALA PARA UN MES DADO
+  // ================================================================
+  function calcularMetricas(registros, mes) {
+    const filtrados = registros.filter(r => r.date && r.date.startsWith(mes));
+    const resultado = {};
+
+    SALAS.forEach(sala => {
+      const registrosSala = filtrados.filter(r => r.ward === sala);
+      if (registrosSala.length === 0) {
+        resultado[sala] = { totalPatients: 0, disponible: false };
+        return;
+      }
+
+      const sums = {};
+      registrosSala.forEach(r => {
+        for (const key in r) {
+          if (typeof r[key] === 'number') {
+            if (!sums[key]) sums[key] = 0;
+            sums[key] += r[key];
+          }
+        }
+        if (r.extra) {
+          for (const key in r.extra) {
+            if (typeof r.extra[key] === 'number') {
+              if (!sums[key]) sums[key] = 0;
+              sums[key] += r.extra[key];
+            }
+          }
+        }
+      });
+
+      const total = sums.totalPatients || 0;
+      const metrics = {
+        totalPatients: total,
+        disponible: true,
+        coberturaLPP: total > 0 ? ((sums.lppEvaluated || 0) / total * 100) : 0,
+        incidenciaLPP: total > 0 ? ((sums.lppIncidence || 0) / total * 100) : 0,
+        tasaEA: total > 0 ? ((sums.adverseEvents || 0) / total * 1000) : 0,
+        tasaCaidas: total > 0 ? ((sums.falls || 0) / total * 1000) : 0,
+        cumplimientoCVC: (sums.cvcTotal || 0) > 0 ? ((sums.cvcDone || 0) / (sums.cvcTotal || 0) * 100) : 0,
+        cumplimientoVM: (sums.vmTotal || 0) > 0 ? ((sums.vmDone || 0) / (sums.vmTotal || 0) * 100) : 0,
+        cumplimientoCUP: (sums.cupTotal || 0) > 0 ? ((sums.cupDone || 0) / (sums.cupTotal || 0) * 100) : 0,
+        incidenciaFlebitis: (sums.cvpTotal || 0) > 0 ? ((sums.phlebitis || 0) / (sums.cvpTotal || 0) * 100) : 0,
+        cumplimientoPAE: (sums.paeTotal || 0) > 0 ? (((sums.paeDay || 0)+(sums.paeNight || 0)) / (sums.paeTotal || 0) * 100) : 0,
+        conciencia: total > 0 ? ((sums.consciousness || 0) / total * 100) : 0,
+      };
+
+      for (const key in EXTRA_INDICATORS) {
+        const def = EXTRA_INDICATORS[key];
+        const num = sums[def.numerator] || 0;
+        const den = sums[def.denominator] || 0;
+        let valor = 0;
+        let disponible = false;
+        if (den > 0) {
+          disponible = true;
+          if (def.format === 'percent') valor = (num / den) * 100;
+          else if (def.format === 'rate') valor = (num / den) * 1000;
+          else if (def.format === 'avg') valor = num / den;
+          else if (def.format === 'ratio') valor = num / den;
+          else valor = num / den;
+        }
+        metrics[key] = { label: def.label, valor, num, den, format: def.format, disponible };
+      }
+
+      resultado[sala] = metrics;
+    });
+
+    return resultado;
+  }
+
+  // ================================================================
+  // RENDERIZAR DASHBOARD
+  // ================================================================
+  let datosGlobales = {};
+  let mesActual = '';
+
+  async function cargarDashboard(mesSeleccionado) {
+    const registros = await getData();
+    if (registros.length === 0) {
+      document.getElementById('tablaSalas').innerHTML = '<div class="alert alert-warning">No hay registros en la base de datos.</div>';
+      return;
+    }
+
+    const mesesSet = new Set();
+    registros.forEach(r => { if (r.date) mesesSet.add(r.date.substring(0,7)); });
+    const meses = Array.from(mesesSet).sort();
+    if (meses.length === 0) {
+      document.getElementById('tablaSalas').innerHTML = '<div class="alert alert-warning">No hay fechas disponibles.</div>';
+      return;
+    }
+
+    const selector = document.getElementById('monthSelector');
+    if (!mesSeleccionado || !meses.includes(mesSeleccionado)) {
+      mesSeleccionado = meses[meses.length - 1];
+    }
+    mesActual = mesSeleccionado;
+    selector.innerHTML = meses.map(m => {
+      const [y, mo] = m.split('-');
+      const label = `${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Set','Oct','Nov','Dic'][parseInt(mo)-1]} ${y}`;
+      return `<option value="${m}" ${m === mesSeleccionado ? 'selected' : ''}>${label}</option>`;
+    }).join('');
+
+    datosGlobales = calcularMetricas(registros, mesSeleccionado);
+
+    const baseKeys = [
+      'coberturaLPP', 'incidenciaLPP', 'tasaEA', 'tasaCaidas',
+      'cumplimientoCVC', 'cumplimientoVM', 'cumplimientoCUP',
+      'incidenciaFlebitis', 'cumplimientoPAE', 'conciencia'
+    ];
+    const extraKeys = Object.keys(EXTRA_INDICATORS);
+    const allKeys = [...baseKeys, ...extraKeys];
+    const labelMap = {
+      'coberturaLPP': 'Cobertura LPP',
+      'incidenciaLPP': 'Incidencia LPP',
+      'tasaEA': 'Tasa EA (x1000)',
+      'tasaCaidas': 'Tasa Caídas (x1000)',
+      'cumplimientoCVC': 'Cumplimiento CVC',
+      'cumplimientoVM': 'Cumplimiento VM',
+      'cumplimientoCUP': 'Cumplimiento CUP',
+      'incidenciaFlebitis': 'Flebitis (CVP)',
+      'cumplimientoPAE': 'Cumplimiento PAE',
+      'conciencia': 'Conciencia'
+    };
+    for (const key in EXTRA_INDICATORS) {
+      labelMap[key] = EXTRA_INDICATORS[key].label;
+    }
+
+    const indicatorSelect = document.getElementById('chartIndicatorSelect');
+    indicatorSelect.innerHTML = allKeys.map(key => {
+      const label = labelMap[key] || key.replace(/([A-Z])/g, ' $1').trim();
+      return `<option value="${key}">${label}</option>`;
+    }).join('');
+    if (allKeys.length > 0) {
+      indicatorSelect.value = allKeys[0];
+    }
+
+    renderKPIs(datosGlobales);
+    renderTabla(datosGlobales);
+    actualizarGrafico();
+  }
+
+  // ================================================================
+  // KPIS GLOBALES
+  // ================================================================
+  function renderKPIs(data) {
+    let totalPac = 0, salasActivas = 0, salasVerdes = 0, salasRojas = 0;
+    let sumCob = 0, countCob = 0;
+
+    for (const sala in data) {
+      const d = data[sala];
+      if (d.disponible && d.totalPatients > 0) {
+        totalPac += d.totalPatients;
+        salasActivas++;
+        if (d.coberturaLPP >= 90) salasVerdes++;
+        else if (d.coberturaLPP < 70 && d.coberturaLPP > 0) salasRojas++;
+        if (d.coberturaLPP > 0) { sumCob += d.coberturaLPP; countCob++; }
+      }
+    }
+    const avgCob = countCob > 0 ? sumCob / countCob : 0;
+
+    const kpis = [
+      { label: 'Pacientes-día totales', value: totalPac, unit: '' },
+      { label: 'Salas activas', value: salasActivas, unit: '' },
+      { label: 'Cobertura LPP (prom.)', value: avgCob, unit: '%' },
+      { label: 'Salas en VERDE', value: salasVerdes, unit: '✅' },
+      { label: 'Salas en ROJO', value: salasRojas, unit: '⚠️' },
+    ];
+    document.getElementById('kpisGlobales').innerHTML = kpis.map(k =>
+      `<div class="col-md-2 col-sm-4 col-6">
+        <div class="kpi-card">
+          <div class="kpi-label">${k.label}</div>
+          <div class="kpi-value">${typeof k.value === 'number' ? k.value.toFixed(1) : k.value}<span class="kpi-unit">${k.unit}</span></div>
+        </div>
+      </div>`
+    ).join('');
+  }
+
+  // ================================================================
+  // TABLA CON SEMÁFOROS
+  // ================================================================
+  function renderTabla(data) {
+    const metricKeys = new Set(['totalPatients']);
+    const baseKeys = ['coberturaLPP', 'incidenciaLPP', 'tasaEA', 'tasaCaidas', 'cumplimientoCVC', 'cumplimientoVM', 'cumplimientoCUP', 'incidenciaFlebitis', 'cumplimientoPAE', 'conciencia'];
+    baseKeys.forEach(k => metricKeys.add(k));
+    for (const key in EXTRA_INDICATORS) {
+      metricKeys.add(key);
+    }
+
+    const labelMap = {
+      'totalPatients': 'Pacientes',
+      'coberturaLPP': 'Cob. LPP',
+      'incidenciaLPP': 'Inc. LPP',
+      'tasaEA': 'Tasa EA',
+      'tasaCaidas': 'Tasa Caídas',
+      'cumplimientoCVC': 'Cumpl. CVC',
+      'cumplimientoVM': 'Cumpl. VM',
+      'cumplimientoCUP': 'Cumpl. CUP',
+      'incidenciaFlebitis': 'Flebitis',
+      'cumplimientoPAE': 'Cumpl. PAE',
+      'conciencia': 'Conciencia'
+    };
+    for (const key in EXTRA_INDICATORS) {
+      labelMap[key] = EXTRA_INDICATORS[key].label;
+    }
+
+    const columns = Array.from(metricKeys);
+    const order = ['totalPatients', 'coberturaLPP', 'incidenciaLPP', 'tasaEA', 'tasaCaidas', 
+                   'cumplimientoCVC', 'cumplimientoVM', 'cumplimientoCUP', 'incidenciaFlebitis', 
+                   'cumplimientoPAE', 'conciencia'];
+    columns.sort((a, b) => {
+      const ia = order.indexOf(a), ib = order.indexOf(b);
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      return a.localeCompare(b);
+    });
+
+    let html = `<table class="table table-bordered table-striped table-general">
+      <thead><tr><th>Sala</th>`;
+    columns.forEach(col => {
+      const label = labelMap[col] || col.replace(/([A-Z])/g, ' $1').trim();
+      html += `<th>${label}</th>`;
+    });
+    html += `<th>Estado</th></tr></thead><tbody>`;
+
+    for (const sala of SALAS) {
+      const d = data[sala];
+      if (!d || !d.disponible) {
+        html += `<tr><td><strong>${sala}</strong></td><td colspan="${columns.length+1}" class="text-muted">Sin datos</td></tr>`;
+        continue;
+      }
+      html += `<tr><td><strong>${sala}</strong></td>`;
+      let redCount = 0, yellowCount = 0, greenCount = 0;
+
+      columns.forEach(col => {
+        let valor = d[col];
+        let display = '-';
+        let clase = '';
+
+        if (col === 'totalPatients') {
+          display = valor || 0;
+        } else if (typeof valor === 'object' && valor !== null) {
+          if (valor.disponible) {
+            display = valor.valor.toFixed(1) + (valor.format === 'percent' ? '%' : valor.format === 'rate' ? '' : '');
+            if (valor.format === 'percent') {
+              if (valor.valor >= 90) { clase = 'status-green'; greenCount++; }
+              else if (valor.valor >= 70) { clase = 'status-yellow'; yellowCount++; }
+              else { clase = 'status-red'; redCount++; }
+            }
+          } else {
+            display = 'N/A';
+          }
+        } else if (typeof valor === 'number') {
+          if (col !== 'totalPatients') {
+            display = valor.toFixed(1) + '%';
+            if (valor >= 90) { clase = 'status-green'; greenCount++; }
+            else if (valor >= 70) { clase = 'status-yellow'; yellowCount++; }
+            else if (valor > 0) { clase = 'status-red'; redCount++; }
+          } else {
+            display = valor;
+          }
+        }
+        html += `<td class="${clase}">${display}</td>`;
+      });
+
+      let estadoClass = 'status-green';
+      let estadoText = '🟢 OK';
+      if (redCount >= 2) { estadoClass = 'status-red'; estadoText = '🔴 Crítico'; }
+      else if (redCount >= 1 || yellowCount >= 3) { estadoClass = 'status-yellow'; estadoText = '🟡 Alerta'; }
+      html += `<td class="${estadoClass}">${estadoText}</td>`;
+      html += `</tr>`;
+    }
+    html += '</tbody></table>';
+    document.getElementById('tablaSalas').innerHTML = html;
+  }
+
+  // ================================================================
+  // GRÁFICO
+  // ================================================================
+  let chartInstance = null;
+
+  function actualizarGrafico() {
+    const indicator = document.getElementById('chartIndicatorSelect').value;
+    if (!indicator) return;
+    const ctx = document.getElementById('chartGeneral').getContext('2d');
+    if (chartInstance) chartInstance.destroy();
+
+    const labels = [];
+    const data = [];
+    const colors = [];
+
+    for (const sala of SALAS) {
+      const d = datosGlobales[sala];
+      let val = 0;
+      if (d && d.disponible) {
+        if (typeof d[indicator] === 'object' && d[indicator] !== null) {
+          val = d[indicator].valor || 0;
+        } else {
+          val = d[indicator] || 0;
+        }
+      }
+      labels.push(sala);
+      data.push(val);
+      if (val >= 90) colors.push('#28a745');
+      else if (val >= 70) colors.push('#ffc107');
+      else if (val > 0) colors.push('#dc3545');
+      else colors.push('#6c757d');
+    }
+
+    if (labels.length === 0) return;
+
+    const selectedLabel = document.getElementById('chartIndicatorSelect').selectedOptions[0]?.text || indicator;
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: selectedLabel,
+          data: data,
+          backgroundColor: colors,
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ctx.parsed.y.toFixed(1) + (indicator.includes('tasa') ? '' : '%') } }
+        },
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: '%' } },
+          x: { ticks: { font: { size: 9 } } }
+        }
+      }
+    });
+  }
+
+  // ================================================================
+  // INICIALIZACIÓN
+  // ================================================================
+  document.addEventListener('DOMContentLoaded', function() {
+    cargarDashboard();
+  });
+</script>
+</body>
+</html>
