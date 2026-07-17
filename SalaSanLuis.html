@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== ESTILOS (idénticos a Sala San José) ===== */
+    /* ===== ESTILOS (idénticos a Sala San Vicente) ===== */
     body { background: linear-gradient(135deg, #f0f7fc 0%, #e6f0f9 100%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     .navbar-custom { background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 12px 0; }
     .navbar-brand { font-weight: 700; font-size: 1.5rem; color: #0a3d62 !important; }
@@ -21,8 +21,7 @@
     .card-header i { color: #2c7da0; margin-right: 8px; }
     .kpi-card { background: white; border-radius: 14px; padding: 18px 20px; border-left: 6px solid #0a3d62; box-shadow: 0 4px 12px rgba(0,0,0,0.02); height: 100%; transition: 0.3s; position: relative; }
     .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.06); }
-    .kpi-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-    .kpi-label i { color: #2c7da0; font-size: 0.9rem; cursor: help; }
+    .kpi-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; font-weight: 600; }
     .kpi-value { font-size: 2.2rem; font-weight: 700; color: #0a3d62; line-height: 1.2; }
     .kpi-unit { font-size: 1rem; color: #6c757d; margin-left: 4px; }
     .table-indicators th { background: #0a3d62; color: white; font-weight: 500; font-size: 0.85rem; text-align: center; vertical-align: middle; }
@@ -32,7 +31,8 @@
     .nav-tabs .nav-link.active { color: #0a3d62; border-bottom: 3px solid #0a3d62; background: transparent; }
     .nav-tabs .nav-link:hover { border-bottom-color: #2c7da0; color: #2c7da0; }
     .chart-container { position: relative; height: 250px; width: 100%; margin-bottom: 20px; }
-    .form-label { font-weight: 600; color: #343a40; font-size: 0.9rem; }
+    .form-label { font-weight: 600; color: #343a40; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+    .form-label i { color: #2c7da0; font-size: 0.9rem; cursor: help; }
     .form-control { border-radius: 30px; border: 1px solid #dce4ec; padding: 6px 16px; }
     .form-control:focus { border-color: #2c7da0; box-shadow: 0 0 0 0.2rem rgba(44,125,160,0.2); }
     .btn-primary { background: #0a3d62; border: none; border-radius: 30px; padding: 10px 30px; font-weight: 600; transition: 0.3s; }
@@ -46,6 +46,12 @@
     .indicador-tabla th { background: #0a3d62; color: white; font-weight: 500; font-size: 0.85rem; text-align: center; vertical-align: middle; }
     .indicador-tabla td { text-align: center; vertical-align: middle; font-size: 0.9rem; }
     .table-sm th, .table-sm td { padding: 6px 8px; font-size: 0.85rem; }
+    .help-icon { color: #2c7da0; cursor: help; margin-left: 4px; font-size: 0.9rem; }
+    .status-green { background-color: #d4edda; color: #155724; }
+    .status-yellow { background-color: #fff3cd; color: #856404; }
+    .status-red { background-color: #f8d7da; color: #721c24; }
+    .status-neutral { background-color: #f8f9fa; color: #6c757d; }
+    .sem-foro-texto { font-size: 0.8rem; font-weight: 600; display: block; margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -76,34 +82,44 @@
         <div class="card-body">
           <form id="dailyForm">
             <div class="row g-3">
-              <div class="col-md-3"><label class="form-label">Fecha</label><input type="date" class="form-control" id="regDate" required></div>
+              <div class="col-md-3">
+                <label class="form-label">Fecha</label>
+                <input type="date" class="form-control" id="regDate" required>
+              </div>
               <input type="hidden" id="regWard" value="Sala San Luis">
 
-              <div class="col-md-3"><label class="form-label">Pacientes al inicio del día</label><input type="number" class="form-control" id="startPatients" value="0" min="0" required></div>
-              <div class="col-md-3"><label class="form-label">Ingresos del día</label><input type="number" class="form-control" id="admissions" value="0" min="0"></div>
-              <div class="col-md-3"><label class="form-label">Egresos del día</label><input type="number" class="form-control" id="discharges" value="0" min="0"></div>
-              <div class="col-md-3"><label class="form-label">Total pacientes (calculado)</label><input type="number" class="form-control" id="totalPatients" readonly style="background:#e9ecef; font-weight:bold;"></div>
+              <!-- DATOS DE PACIENTES -->
+              <div class="col-md-3"><label class="form-label"><i class="fas fa-users"></i> Pacientes al inicio del día</label><input type="number" class="form-control" id="startPatients" value="0" min="0" required></div>
+              <div class="col-md-3"><label class="form-label"><i class="fas fa-sign-in-alt"></i> Ingresos del día (nuevos pacientes)</label><input type="number" class="form-control" id="admissions" value="0" min="0"></div>
+              <div class="col-md-3"><label class="form-label"><i class="fas fa-sign-out-alt"></i> Egresos del día</label><input type="number" class="form-control" id="discharges" value="0" min="0"></div>
+              <div class="col-md-3"><label class="form-label"><i class="fas fa-calculator"></i> Total pacientes (calculado)</label><input type="number" class="form-control" id="totalPatients" readonly style="background:#e9ecef; font-weight:bold;"></div>
 
+              <!-- INDICADORES COMUNES -->
               <div id="commonIndicators" class="row g-3">
-                <div class="col-md-3"><label class="form-label">Evaluados Riesgo LPP</label><input type="number" class="form-control" id="lppEvaluated" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">LPP (>48h)</label><input type="number" class="form-control" id="lppIncidence" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">Eventos Adversos</label><input type="number" class="form-control" id="adverseEvents" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">Caídas</label><input type="number" class="form-control" id="falls" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">CVC Ejec.</label><input type="number" class="form-control" id="cvcDone" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">CVC Oport.</label><input type="number" class="form-control" id="cvcTotal" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">VM Ejec.</label><input type="number" class="form-control" id="vmDone" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">VM Oport.</label><input type="number" class="form-control" id="vmTotal" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">CUP Ejec.</label><input type="number" class="form-control" id="cupDone" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">CUP Oport.</label><input type="number" class="form-control" id="cupTotal" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">Pacientes con CVP</label><input type="number" class="form-control" id="cvpTotal" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">Flebitis (CVP)</label><input type="number" class="form-control" id="phlebitis" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label" style="color:#17a2b8;">PAE DÍA</label><input type="number" class="form-control" id="paeDay" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label" style="color:#6f42c1;">PAE NOCHE</label><input type="number" class="form-control" id="paeNight" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">PAE Evaluados (Oport.)</label><input type="number" class="form-control" id="paeTotal" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">Evaluación Conciencia</label><input type="number" class="form-control" id="consciousness" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° pacientes ingresados EVALUADOS con escala de riesgo LPP</label><input type="number" class="form-control" id="lppEvaluated" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° pacientes que desarrollan LPP (durante su estancia)</label><input type="number" class="form-control" id="lppIncidence" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° Eventos Adversos notificados en el día</label><input type="number" class="form-control" id="adverseEvents" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° Caídas ocurridas en el día</label><input type="number" class="form-control" id="falls" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° Cuidados CVC realizados en el día</label><input type="number" class="form-control" id="cvcDone" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° Oportunidades de cuidado CVC en el día</label><input type="number" class="form-control" id="cvcTotal" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° Cuidados VM realizados en el día</label><input type="number" class="form-control" id="vmDone" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° Oportunidades de cuidado VM en el día</label><input type="number" class="form-control" id="vmTotal" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° Cuidados CUP realizados en el día</label><input type="number" class="form-control" id="cupDone" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° Oportunidades de cuidado CUP en el día</label><input type="number" class="form-control" id="cupTotal" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° Pacientes con CVP en el día</label><input type="number" class="form-control" id="cvpTotal" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° Flebitis (CVP) en el día</label><input type="number" class="form-control" id="phlebitis" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label" style="color:#17a2b8;">N° PAE ejecutados en el turno día</label><input type="number" class="form-control" id="paeDay" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label" style="color:#6f42c1;">N° PAE ejecutados en el turno noche</label><input type="number" class="form-control" id="paeNight" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° Total PAE que debieron registrarse (día + noche)</label><input type="number" class="form-control" id="paeTotal" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label" style="color:#007bff;">N° Glasgow registradas en el turno día</label><input type="number" class="form-control" id="consciousnessDay" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label" style="color:#6610f2;">N° Glasgow registradas en el turno noche</label><input type="number" class="form-control" id="consciousnessNight" value="0" min="0"></div>
+                <div class="col-md-3"><label class="form-label">N° Total Glasgow que debieron registrarse (día + noche)</label><input type="number" class="form-control" id="consciousnessExpected" value="0" min="0"></div>
               </div>
 
-              <div id="extraFieldsContainer" class="row g-3 mt-2 extra-fields-container"></div>
+              <!-- CAMPOS EXTRAS: San Luis NO tiene -->
+              <div id="extraFieldsContainer" class="row g-3 mt-2 extra-fields-container">
+                <div class="col-12 text-muted">No hay indicadores adicionales para esta sala.</div>
+              </div>
 
               <div class="col-12 mt-3">
                 <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save me-2"></i> Guardar Registro</button>
@@ -147,74 +163,54 @@
   const SUPABASE_URL = 'https://hdhqzawcylkvttsqqjty.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_x5r7hUrN2pzVexbtZ_b0Wg_OBDEMAKP';
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // ================================================================
-  // SALA FIJA (SIN TILDE)
-  // ================================================================
   const FIXED_WARD = 'Sala San Luis';
+  const WARD_CONFIG = { 'Sala San Luis': { extras: [] } };
+  const EXTRA_INDICATORS = {};
+  function getExtraFields(ward) { return []; }
 
   // ================================================================
-  // CONFIGURACIÓN DE INDICADORES POR SALA
+  // SEMÁFORO SUAVE
   // ================================================================
-  const WARD_CONFIG = {
-    'Sala San Jose': { extras: [] },
-    'Sala San Luis': { extras: [] },
-    'Sala San Vicente': { extras: [] },
-    'Sala Inmaculada': { extras: [] },
-    'Sala Santa Ana': { extras: ['aspiration'] },
-    'Sala La Virgen': { extras: ['wells', 'dysphagia'] },
-    'Sala Jesus Maria': { extras: ['aspiration'] },
-    'Sala El Rosario': { extras: ['surgery'] },
-    'Sala Corazon de Jesus': { extras: ['surgery'] },
-    'Sala San Miguel': { extras: ['surgery'] },
-    'Unidad UCI': { extras: ['uci_advanced'] },
-    'Unidad UCIN': { extras: ['uci_advanced'] },
-    'Emergencia': { extras: ['emergency_advanced'] }
-  };
+  function obtenerSemaforo(nombre, valor, denominador) {
+    const umbrales = {
+      'Cobertura LPP': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+      'Incidencia LPP': { verde: 5, amarillo: 12, rojo: 20, invertido: true },
+      'Tasa EA (x1000)': { verde: 30, amarillo: 60, rojo: 120, invertido: true },
+      'Tasa Caídas (x1000)': { verde: 20, amarillo: 50, rojo: 100, invertido: true },
+      'Cumpl. CVC': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+      'Cumpl. VM': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+      'Cumpl. CUP': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+      'Cumpl. PAE': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+      'Flebitis (CVP)': { verde: 5, amarillo: 10, rojo: 20, invertido: true },
+      'Cumpl. Glasgow': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+    };
 
-  // ================================================================
-  // DEFINICIÓN DE INDICADORES EXTRAS
-  // ================================================================
-  const EXTRA_INDICATORS = {
-    'wells': { label: 'Wells (TVP)', numerator: 'wellsApplied', denominator: 'wellsTotal', format: 'percent' },
-    'dysphagia': { label: 'Test Disfagia', numerator: 'dysphagiaApplied', denominator: 'dysphagiaTotal', format: 'percent' },
-    'aspiration': { label: 'Riesgo Aspiración', numerator: 'aspirationRisk', denominator: 'aspirationTotal', format: 'percent' },
-    'surgery': { label: 'Cirugías Programadas', numerator: 'surgeryDone', denominator: 'surgeryTotal', format: 'percent' },
-    'raCvc': { label: 'Retiro CVC/CVP', numerator: 'raCvc', denominator: 'pacCvc', format: 'percent' },
-    'raTet': { label: 'Retiro TET', numerator: 'raTet', denominator: 'pacTet', format: 'percent' },
-    'raSng': { label: 'Retiro SNG', numerator: 'raSng', denominator: 'pacSng', format: 'percent' },
-    'raCup': { label: 'Retiro CUP', numerator: 'raCup', denominator: 'pacCup', format: 'percent' },
-    'sedation': { label: 'Sedación evaluada', numerator: 'sedationEvaluated', denominator: 'sedationTotal', format: 'percent' },
-    'pic': { label: 'PIC vigilada', numerator: 'picRegistered', denominator: 'picTotal', format: 'percent' },
-    'vap': { label: 'Tasa VAP (x1000 días VM)', numerator: 'vapCases', denominator: 'vmDays', format: 'rate' },
-    'glasgow': { label: 'Glasgow completo', numerator: 'glasgowComplete', denominator: 'glasgowTotal', format: 'percent' },
-    'triage': { label: 'Tiempo Triaje (min)', numerator: 'timeTriageSum', denominator: 'patientsTriaged', format: 'avg' },
-    'thrombolysis': { label: 'Tiempo Trombólisis (min)', numerator: 'timeThrombolysisSum', denominator: 'thrombolysedPatients', format: 'avg' },
-    'obs': { label: 'Tiempo Observación (min)', numerator: 'obsStaySum', denominator: 'obsPatients', format: 'avg' },
-    'emergencyFalls': { label: 'Caídas Emergencia', numerator: 'emergencyFalls', denominator: 'emergencyTotalPatients', format: 'percent' },
-    'relPacEnf': { label: 'Pacientes / Enfermera', numerator: 'patientsAttended', denominator: 'nursesScheduled', format: 'ratio' },
-  };
-
-  function getExtraFields(ward) {
-    const config = WARD_CONFIG[ward];
-    if (!config) return [];
-    const extras = config.extras;
-    const result = [];
-    if (extras.includes('wells')) result.push('wells');
-    if (extras.includes('dysphagia')) result.push('dysphagia');
-    if (extras.includes('aspiration')) result.push('aspiration');
-    if (extras.includes('surgery')) result.push('surgery');
-    if (extras.includes('uci_advanced')) {
-      result.push('raCvc', 'raTet', 'raSng', 'raCup', 'sedation', 'pic', 'vap');
+    const minDen = { 'Tasa EA (x1000)': 30, 'Tasa Caídas (x1000)': 30 };
+    const min = minDen[nombre] || 5;
+    if (denominador < min) {
+      return { color: 'status-neutral', texto: 'Datos del mes' };
     }
-    if (extras.includes('emergency_advanced')) {
-      result.push('glasgow', 'triage', 'thrombolysis', 'obs', 'emergencyFalls', 'relPacEnf');
+
+    const u = umbrales[nombre] || { verde: 90, amarillo: 70, rojo: 50, invertido: false };
+    let color, texto;
+
+    if (u.invertido) {
+      if (valor <= u.verde) { color = 'status-green'; texto = 'Cumplido'; }
+      else if (valor <= u.amarillo) { color = 'status-yellow'; texto = 'En observación'; }
+      else if (valor <= u.rojo) { color = 'status-yellow'; texto = 'En observación'; }
+      else { color = 'status-red'; texto = 'Revisar'; }
+    } else {
+      if (valor >= u.verde) { color = 'status-green'; texto = 'Cumplido'; }
+      else if (valor >= u.amarillo) { color = 'status-yellow'; texto = 'En observación'; }
+      else if (valor >= u.rojo) { color = 'status-yellow'; texto = 'En observación'; }
+      else { color = 'status-red'; texto = 'Revisar'; }
     }
-    return result;
+
+    return { color, texto };
   }
 
   // ================================================================
-  // GESTIÓN DE DATOS (SUPABASE)
+  // GESTIÓN DE DATOS
   // ================================================================
   async function getData() {
     const { data, error } = await supabaseClient
@@ -222,11 +218,7 @@
       .select("*")
       .eq("ward", FIXED_WARD)
       .order("date", { ascending: true });
-
-    if (error) {
-      console.error("Error al obtener datos:", error);
-      return [];
-    }
+    if (error) { console.error(error); return []; }
     return data.map(row => row.data);
   }
 
@@ -237,41 +229,22 @@
       .eq("date", record.date)
       .eq("ward", FIXED_WARD)
       .maybeSingle();
-
-    if (checkError) {
-      console.error("Error al verificar:", checkError);
-      alert("Error de verificación: " + checkError.message);
-      return false;
-    }
-
+    if (checkError) { console.error(checkError); alert("Error de verificación"); return false; }
     if (existing) {
       const { error } = await supabaseClient
         .from("REGISTROS")
         .update({ data: record })
         .eq("id", existing.id);
-      if (error) {
-        console.error("Error al actualizar:", error);
-        alert("Error al actualizar: " + error.message);
-        return false;
-      }
+      if (error) { console.error(error); alert("Error al actualizar"); return false; }
     } else {
       const { error } = await supabaseClient
         .from("REGISTROS")
         .insert({ date: record.date, ward: FIXED_WARD, data: record });
-      if (error) {
-        console.error("Error al insertar:", error);
-        alert("Error al insertar: " + error.message);
-        return false;
-      }
+      if (error) { console.error(error); alert("Error al insertar"); return false; }
     }
     return true;
   }
 
-  function getWard() { return FIXED_WARD; }
-
-  // ================================================================
-  // FUNCIONES AUXILIARES
-  // ================================================================
   function updateTotal() {
     const start = parseInt(document.getElementById('startPatients').value) || 0;
     const adm = parseInt(document.getElementById('admissions').value) || 0;
@@ -280,25 +253,7 @@
   }
 
   function renderExtraFields(ward) {
-    const container = document.getElementById('extraFieldsContainer');
-    container.innerHTML = '';
-    const extras = getExtraFields(ward);
-    if (extras.length === 0) {
-      container.innerHTML = '<div class="col-12 text-muted">No hay indicadores adicionales.</div>';
-      return;
-    }
-    extras.forEach(extraKey => {
-      const def = EXTRA_INDICATORS[extraKey];
-      if (!def) return;
-      const col1 = document.createElement('div');
-      col1.className = 'col-md-3';
-      col1.innerHTML = `<label class="form-label">${def.label} (N°)</label><input type="number" class="form-control" id="${def.numerator}" value="0" min="0">`;
-      container.appendChild(col1);
-      const col2 = document.createElement('div');
-      col2.className = 'col-md-3';
-      col2.innerHTML = `<label class="form-label">${def.label} (Den)</label><input type="number" class="form-control" id="${def.denominator}" value="0" min="0">`;
-      container.appendChild(col2);
-    });
+    document.getElementById('extraFieldsContainer').innerHTML = '<div class="col-12 text-muted">No hay indicadores adicionales para esta sala.</div>';
   }
 
   // ================================================================
@@ -306,9 +261,17 @@
   // ================================================================
   function calcularIndicadores(record) {
     const indicadores = {};
-    const baseIndicators = [
-      { key: 'coberturaLPP', label: 'Cobertura LPP', num: 'lppEvaluated', den: 'totalPatients', fmt: 'percent' },
-      { key: 'incidenciaLPP', label: 'Incidencia LPP', num: 'lppIncidence', den: 'totalPatients', fmt: 'percent' },
+    const total = record.totalPatients || 0;
+    const lppEval = record.lppEvaluated || 0;
+    const cvpTotal = record.cvpTotal || 0;
+    const admissions = record.admissions || 0;
+    const glasgowDay = record.consciousnessDay || 0;
+    const glasgowNight = record.consciousnessNight || 0;
+    const glasgowExpected = record.consciousnessExpected || 0;
+
+    const base = [
+      { key: 'coberturaLPP', label: 'Cobertura LPP', num: 'lppEvaluated', den: 'admissions', fmt: 'percent' },
+      { key: 'incidenciaLPP', label: 'Incidencia LPP', num: 'lppIncidence', den: 'lppEvaluated', fmt: 'percent' },
       { key: 'tasaEA', label: 'Tasa EA (x1000)', num: 'adverseEvents', den: 'totalPatients', fmt: 'rate' },
       { key: 'tasaCaidas', label: 'Tasa Caídas (x1000)', num: 'falls', den: 'totalPatients', fmt: 'rate' },
       { key: 'cumplimientoCVC', label: 'Cumpl. CVC', num: 'cvcDone', den: 'cvcTotal', fmt: 'percent' },
@@ -316,9 +279,10 @@
       { key: 'cumplimientoCUP', label: 'Cumpl. CUP', num: 'cupDone', den: 'cupTotal', fmt: 'percent' },
       { key: 'incidenciaFlebitis', label: 'Flebitis (CVP)', num: 'phlebitis', den: 'cvpTotal', fmt: 'percent' },
       { key: 'cumplimientoPAE', label: 'Cumpl. PAE', num: 'paeDay+paeNight', den: 'paeTotal', fmt: 'percent' },
-      { key: 'conciencia', label: 'Conciencia', num: 'consciousness', den: 'totalPatients', fmt: 'percent' },
+      { key: 'cumplimientoGlasgow', label: 'Cumpl. Glasgow', num: 'consciousnessDay+consciousnessNight', den: 'consciousnessExpected', fmt: 'percent' },
     ];
-    baseIndicators.forEach(ind => {
+
+    base.forEach(ind => {
       let num = 0, den = 0;
       if (ind.num.includes('+')) {
         const parts = ind.num.split('+');
@@ -334,22 +298,6 @@
         else result = num / den;
       }
       indicadores[ind.key] = { label: ind.label, numerator: num, denominator: den, result, format: ind.fmt };
-    });
-    const extras = getExtraFields(FIXED_WARD);
-    extras.forEach(extraKey => {
-      const def = EXTRA_INDICATORS[extraKey];
-      if (!def) return;
-      const num = record.extra && record.extra[def.numerator] !== undefined ? record.extra[def.numerator] : 0;
-      const den = record.extra && record.extra[def.denominator] !== undefined ? record.extra[def.denominator] : 0;
-      let result = 0;
-      if (den > 0) {
-        if (def.format === 'percent') result = (num / den) * 100;
-        else if (def.format === 'rate') result = (num / den) * 1000;
-        else if (def.format === 'avg') result = num / den;
-        else if (def.format === 'ratio') result = num / den;
-        else result = num / den;
-      }
-      indicadores[extraKey] = { label: def.label, numerator: num, denominator: den, result, format: def.format };
     });
     return indicadores;
   }
@@ -371,8 +319,6 @@
       if (ind.denominator > 0) {
         if (ind.format === 'percent') resultado = ind.result.toFixed(1) + '%';
         else if (ind.format === 'rate') resultado = ind.result.toFixed(1);
-        else if (ind.format === 'avg') resultado = ind.result.toFixed(1) + ' min';
-        else if (ind.format === 'ratio') resultado = ind.result.toFixed(1) + ':1';
         else resultado = ind.result.toFixed(1);
       }
       html += `<tr><td><strong>${ind.label}</strong></td><td>${ind.numerator}</td><td>${ind.denominator}</td><td>${resultado}</td></tr>`;
@@ -382,9 +328,9 @@
   }
 
   // ================================================================
-  // DASHBOARD COMPLETO (CON GRÁFICOS)
+  // DASHBOARD (CON GRÁFICO DE BARRAS MENSUAL)
   // ================================================================
-  async function renderDashboard(ward) {
+  async function renderDashboard(ward, selectedMonth = null) {
     const container = document.getElementById('dashboardContent');
     const data = await getData();
     if (data.length === 0) {
@@ -392,6 +338,7 @@
       return;
     }
 
+    // Agrupar por mes
     const months = {};
     data.forEach(d => {
       const key = d.date.substring(0,7);
@@ -399,13 +346,19 @@
       months[key].push(d);
     });
     const sortedMonths = Object.keys(months).sort();
-    const labels = sortedMonths.map(m => {
-      const [y, mo] = m.split('-');
-      const names = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Set','Oct','Nov','Dic'];
-      return `${names[parseInt(mo)-1]} ${y}`;
-    });
+    const names = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Set','Oct','Nov','Dic'];
 
-    function calcIndicators(monthData) {
+    let displayMonth = selectedMonth;
+    if (!displayMonth || !sortedMonths.includes(displayMonth)) {
+      displayMonth = sortedMonths[sortedMonths.length - 1];
+    }
+    if (!displayMonth) {
+      container.innerHTML = `<div class="alert alert-warning">No hay datos disponibles.</div>`;
+      return;
+    }
+
+    // Sumar registros del mes seleccionado
+    function sumarCampos(monthData) {
       const sum = {};
       monthData.forEach(r => {
         for (const key in r) {
@@ -423,189 +376,168 @@
           }
         }
       });
-      const totalPatients = sum.totalPatients || 0;
-      const ind = {
-        totalPatients: totalPatients,
-        lppEvaluated: sum.lppEvaluated || 0,
-        lppIncidence: sum.lppIncidence || 0,
-        adverseEvents: sum.adverseEvents || 0,
-        falls: sum.falls || 0,
-        cvcDone: sum.cvcDone || 0,
-        cvcTotal: sum.cvcTotal || 0,
-        vmDone: sum.vmDone || 0,
-        vmTotal: sum.vmTotal || 0,
-        cupDone: sum.cupDone || 0,
-        cupTotal: sum.cupTotal || 0,
-        phlebitis: sum.phlebitis || 0,
-        cvpTotal: sum.cvpTotal || 0,
-        paeDay: sum.paeDay || 0,
-        paeNight: sum.paeNight || 0,
-        paeTotal: sum.paeTotal || 0,
-        consciousness: sum.consciousness || 0,
-        coberturaLPP: totalPatients > 0 ? ((sum.lppEvaluated || 0) / totalPatients * 100) : 0,
-        incidenciaLPP: totalPatients > 0 ? ((sum.lppIncidence || 0) / totalPatients * 100) : 0,
-        tasaEA: totalPatients > 0 ? ((sum.adverseEvents || 0) / totalPatients * 1000) : 0,
-        tasaCaidas: totalPatients > 0 ? ((sum.falls || 0) / totalPatients * 1000) : 0,
-        cumplimientoCVC: (sum.cvcTotal || 0) > 0 ? ((sum.cvcDone || 0) / (sum.cvcTotal || 0) * 100) : 0,
-        cumplimientoVM: (sum.vmTotal || 0) > 0 ? ((sum.vmDone || 0) / (sum.vmTotal || 0) * 100) : 0,
-        cumplimientoCUP: (sum.cupTotal || 0) > 0 ? ((sum.cupDone || 0) / (sum.cupTotal || 0) * 100) : 0,
-        incidenciaFlebitis: (sum.cvpTotal || 0) > 0 ? ((sum.phlebitis || 0) / (sum.cvpTotal || 0) * 100) : 0,
-        cumplimientoPAE: (sum.paeTotal || 0) > 0 ? (((sum.paeDay || 0) + (sum.paeNight || 0)) / (sum.paeTotal || 0) * 100) : 0,
-        conciencia: totalPatients > 0 ? ((sum.consciousness || 0) / totalPatients * 100) : 0,
-        paeDayTotal: sum.paeDay || 0,
-        paeNightTotal: sum.paeNight || 0,
-        extra: {}
-      };
-      const extras = getExtraFields(ward);
-      extras.forEach(extraKey => {
-        const def = EXTRA_INDICATORS[extraKey];
-        if (!def) return;
-        const num = sum[def.numerator] || 0;
-        const den = sum[def.denominator] || 0;
-        let result = 0;
-        if (den > 0) {
-          if (def.format === 'percent') result = (num / den) * 100;
-          else if (def.format === 'rate') result = (num / den) * 1000;
-          else if (def.format === 'avg') result = num / den;
-          else if (def.format === 'ratio') result = num / den;
-          else result = num / den;
-        }
-        ind.extra[extraKey] = { numerator: num, denominator: den, result, format: def.format, label: def.label };
-      });
-      return ind;
+      return sum;
     }
 
-    const monthIndicators = sortedMonths.map(m => calcIndicators(months[m]));
-    const last = monthIndicators[monthIndicators.length-1] || {};
-    const hasPatients = monthIndicators.some(m => m.totalPatients > 0);
+    const sum = sumarCampos(months[displayMonth]);
+    const totalPatients = sum.totalPatients || 0;
+    const lppEval = sum.lppEvaluated || 0;
+    const cvpTotal = sum.cvpTotal || 0;
+    const admissions = sum.admissions || 0;
+    const glasgowDay = sum.consciousnessDay || 0;
+    const glasgowNight = sum.consciousnessNight || 0;
+    const glasgowExpected = sum.consciousnessExpected || 0;
 
-    let html = `<h4 class="mb-3"><i class="fas fa-chart-pie me-2"></i> Dashboard - ${ward}</h4>`;
+    const detalle = {
+      totalPatients: totalPatients,
+      admissions: admissions,
+      lppEvaluated: lppEval,
+      lppIncidence: sum.lppIncidence || 0,
+      adverseEvents: sum.adverseEvents || 0,
+      falls: sum.falls || 0,
+      cvcDone: sum.cvcDone || 0,
+      cvcTotal: sum.cvcTotal || 0,
+      vmDone: sum.vmDone || 0,
+      vmTotal: sum.vmTotal || 0,
+      cupDone: sum.cupDone || 0,
+      cupTotal: sum.cupTotal || 0,
+      cvpTotal: cvpTotal,
+      phlebitis: sum.phlebitis || 0,
+      paeDay: sum.paeDay || 0,
+      paeNight: sum.paeNight || 0,
+      paeTotal: sum.paeTotal || 0,
+      consciousnessDay: glasgowDay,
+      consciousnessNight: glasgowNight,
+      consciousnessExpected: glasgowExpected,
+      coberturaLPP: admissions > 0 ? ((sum.lppEvaluated || 0) / admissions * 100) : 0,
+      incidenciaLPP: lppEval > 0 ? ((sum.lppIncidence || 0) / lppEval * 100) : 0,
+      tasaEA: totalPatients > 0 ? ((sum.adverseEvents || 0) / totalPatients * 1000) : 0,
+      tasaCaidas: totalPatients > 0 ? ((sum.falls || 0) / totalPatients * 1000) : 0,
+      cumplimientoCVC: (sum.cvcTotal || 0) > 0 ? ((sum.cvcDone || 0) / (sum.cvcTotal || 0) * 100) : 0,
+      cumplimientoVM: (sum.vmTotal || 0) > 0 ? ((sum.vmDone || 0) / (sum.vmTotal || 0) * 100) : 0,
+      cumplimientoCUP: (sum.cupTotal || 0) > 0 ? ((sum.cupDone || 0) / (sum.cupTotal || 0) * 100) : 0,
+      incidenciaFlebitis: cvpTotal > 0 ? ((sum.phlebitis || 0) / cvpTotal * 100) : 0,
+      cumplimientoPAE: (sum.paeTotal || 0) > 0 ? (((sum.paeDay || 0) + (sum.paeNight || 0)) / (sum.paeTotal || 0) * 100) : 0,
+      cumplimientoGlasgow: glasgowExpected > 0 ? (((sum.consciousnessDay || 0) + (sum.consciousnessNight || 0)) / glasgowExpected * 100) : 0,
+    };
+
+    const hasPatients = totalPatients > 0;
+
+    // Selector de mes
+    let monthOptions = sortedMonths.map(m => {
+      const [y, mo] = m.split('-');
+      const label = `${names[parseInt(mo)-1]} ${y}`;
+      const selected = (m === displayMonth) ? 'selected' : '';
+      return `<option value="${m}" ${selected}>${label}</option>`;
+    }).join('');
+
+    let html = `<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <h4 class="mb-2"><i class="fas fa-chart-pie me-2"></i> Dashboard - ${ward}</h4>
+        <div>
+            <label class="me-2" style="font-weight:600;">📅 Mes:</label>
+            <select id="monthSelector" class="form-select" onchange="renderDashboard('${ward}', this.value)" style="width:auto;display:inline-block;border-radius:30px;padding:6px 20px;">
+                ${monthOptions}
+            </select>
+        </div>
+    </div>`;
+
     if (!hasPatients) {
       html += `<div class="alert-warning-dashboard">
-        <i class="fas fa-exclamation-triangle me-2"></i> <strong>No se han registrado pacientes</strong> en los días ingresados.
+        <i class="fas fa-exclamation-triangle me-2"></i> <strong>Este mes no tiene pacientes registrados</strong> (o solo datos en cero).
       </div>`;
     }
 
+    // KPIs
     const kpis = [
-      { label: 'Cobertura LPP', value: last.coberturaLPP || 0, unit: '%' },
-      { label: 'Incidencia LPP', value: last.incidenciaLPP || 0, unit: '%' },
-      { label: 'Tasa EA (x1000)', value: last.tasaEA || 0, unit: '' },
-      { label: 'Tasa Caídas (x1000)', value: last.tasaCaidas || 0, unit: '' },
-      { label: 'PAE Día', value: last.paeDayTotal || 0, unit: '' },
-      { label: 'PAE Noche', value: last.paeNightTotal || 0, unit: '' },
-      { label: 'Cumpl. PAE', value: last.cumplimientoPAE || 0, unit: '%' },
-      { label: 'Conciencia', value: last.conciencia || 0, unit: '%' },
-      { label: 'Cumpl. CVC', value: last.cumplimientoCVC || 0, unit: '%' },
-      { label: 'Cumpl. VM', value: last.cumplimientoVM || 0, unit: '%' },
-      { label: 'Cumpl. CUP', value: last.cumplimientoCUP || 0, unit: '%' },
-      { label: 'Flebitis (CVP)', value: last.incidenciaFlebitis || 0, unit: '%' }
+      { label: 'Cobertura LPP', value: detalle.coberturaLPP, unit: '%', den: detalle.admissions },
+      { label: 'Incidencia LPP', value: detalle.incidenciaLPP, unit: '%', den: detalle.lppEvaluated },
+      { label: 'Tasa EA (x1000)', value: detalle.tasaEA, unit: '', den: detalle.totalPatients },
+      { label: 'Tasa Caídas (x1000)', value: detalle.tasaCaidas, unit: '', den: detalle.totalPatients },
+      { label: 'Cumpl. CVC', value: detalle.cumplimientoCVC, unit: '%', den: detalle.cvcTotal },
+      { label: 'Cumpl. VM', value: detalle.cumplimientoVM, unit: '%', den: detalle.vmTotal },
+      { label: 'Cumpl. CUP', value: detalle.cumplimientoCUP, unit: '%', den: detalle.cupTotal },
+      { label: 'Flebitis (CVP)', value: detalle.incidenciaFlebitis, unit: '%', den: detalle.cvpTotal },
+      { label: 'Cumpl. PAE', value: detalle.cumplimientoPAE, unit: '%', den: detalle.paeTotal },
+      { label: 'Cumpl. Glasgow', value: detalle.cumplimientoGlasgow, unit: '%', den: detalle.consciousnessExpected }
     ];
     html += `<div class="row g-3 mb-4">`;
     kpis.forEach(k => {
       const val = typeof k.value === 'number' ? k.value.toFixed(1) : '0.0';
-      html += `<div class="col-md-3"><div class="kpi-card">
+      const sem = obtenerSemaforo(k.label, k.value, k.den || 1);
+      html += `<div class="col-md-3"><div class="kpi-card" style="border-left-color: ${sem.color === 'status-green' ? '#28a745' : sem.color === 'status-yellow' ? '#ffc107' : sem.color === 'status-red' ? '#dc3545' : '#6c757d'};">
         <div class="kpi-label">${k.label}</div>
         <div class="kpi-value">${val}<span class="kpi-unit">${k.unit}</span></div>
+        <small class="${sem.color} sem-foro-texto">${sem.texto}</small>
       </div></div>`;
     });
     html += `</div>`;
 
-    const extraKeys = Object.keys(last.extra || {});
-    const allIndicatorKeys = [
-      'coberturaLPP', 'incidenciaLPP', 'cumplimientoCVC', 'cumplimientoVM',
-      'cumplimientoCUP', 'incidenciaFlebitis', 'cumplimientoPAE', 'conciencia'
-    ].concat(extraKeys);
-
-    const chartLabels = [];
-    const chartData = [];
-    const colors = ['#0a3d62','#e74c3c','#8e44ad','#1abc9c','#3498db','#e84393','#28a745','#f39c12','#6f42c1','#fd7e14','#20c997','#e83e8c'];
-
-    allIndicatorKeys.forEach((key, idx) => {
-      let val = 0, label = '';
-      if (extraKeys.includes(key)) {
-        const extra = last.extra && last.extra[key];
-        if (extra) {
-          val = extra.result || 0;
-          label = extra.label || key;
-        }
-      } else {
-        val = last[key] || 0;
-        const labelMap = {
-          'coberturaLPP': 'Cob. LPP',
-          'incidenciaLPP': 'Inc. LPP',
-          'cumplimientoCVC': 'Cumpl. CVC',
-          'cumplimientoVM': 'Cumpl. VM',
-          'cumplimientoCUP': 'Cumpl. CUP',
-          'incidenciaFlebitis': 'Flebitis',
-          'cumplimientoPAE': 'Cumpl. PAE',
-          'conciencia': 'Conciencia'
-        };
-        label = labelMap[key] || key;
-      }
-      if (label) {
-        chartLabels.push(label);
-        chartData.push(val);
-      }
-    });
+    // Gráfico de barras (comparativa de indicadores del mes)
+    const chartLabels = ['Cob. LPP','Inc. LPP','Cumpl. CVC','Cumpl. VM','Cumpl. CUP','Flebitis','Cumpl. PAE','Cumpl. Glasgow'];
+    const chartData = [
+      detalle.coberturaLPP,
+      detalle.incidenciaLPP,
+      detalle.cumplimientoCVC,
+      detalle.cumplimientoVM,
+      detalle.cumplimientoCUP,
+      detalle.incidenciaFlebitis,
+      detalle.cumplimientoPAE,
+      detalle.cumplimientoGlasgow
+    ];
+    const colors = ['#0a3d62','#e74c3c','#8e44ad','#1abc9c','#3498db','#e84393','#28a745','#f39c12'];
 
     html += `<div class="row">
       <div class="col-md-12"><div class="chart-container"><canvas id="chartTodosIndicadores"></canvas></div></div>
     </div>`;
 
+    // Tabla de detalle
     html += `<div class="card mt-4">
-      <div class="card-header"><i class="fas fa-table me-2"></i>Detalle de indicadores (último mes)</div>
+      <div class="card-header"><i class="fas fa-table me-2"></i>Detalle de indicadores (${names[parseInt(displayMonth.split('-')[1])-1]} ${displayMonth.split('-')[0]})</div>
       <div class="card-body">
         <div class="table-responsive"><table class="table table-bordered table-striped indicador-tabla">
-          <thead><tr><th>Indicador</th><th>Numerador</th><th>Denominador</th><th>Resultado</th></tr></thead><tbody>`;
-    const detalle = [];
-    const principales = [
-      { label: 'Cobertura LPP', num: last.lppEvaluated || 0, den: last.totalPatients || 0, fmt: 'percent' },
-      { label: 'Incidencia LPP', num: last.lppIncidence || 0, den: last.totalPatients || 0, fmt: 'percent' },
-      { label: 'Tasa EA (x1000)', num: last.adverseEvents || 0, den: last.totalPatients || 0, fmt: 'rate' },
-      { label: 'Tasa Caídas (x1000)', num: last.falls || 0, den: last.totalPatients || 0, fmt: 'rate' },
-      { label: 'Cumpl. CVC', num: last.cvcDone || 0, den: last.cvcTotal || 0, fmt: 'percent' },
-      { label: 'Cumpl. VM', num: last.vmDone || 0, den: last.vmTotal || 0, fmt: 'percent' },
-      { label: 'Cumpl. CUP', num: last.cupDone || 0, den: last.cupTotal || 0, fmt: 'percent' },
-      { label: 'Flebitis (CVP)', num: last.phlebitis || 0, den: last.cvpTotal || 0, fmt: 'percent' },
-      { label: 'Cumpl. PAE', num: (last.paeDayTotal || 0) + (last.paeNightTotal || 0), den: last.paeTotal || 0, fmt: 'percent' },
-      { label: 'Conciencia', num: last.consciousness || 0, den: last.totalPatients || 0, fmt: 'percent' },
+          <thead><tr><th>Indicador</th><th>Numerador</th><th>Denominador</th><th>Resultado</th><th>Estado</th></tr></thead><tbody>`;
+
+    const filas = [
+      { label: 'Cobertura LPP', num: detalle.lppEvaluated, den: detalle.admissions, fmt: 'percent' },
+      { label: 'Incidencia LPP', num: detalle.lppIncidence, den: detalle.lppEvaluated, fmt: 'percent' },
+      { label: 'Tasa EA (x1000)', num: detalle.adverseEvents, den: detalle.totalPatients, fmt: 'rate' },
+      { label: 'Tasa Caídas (x1000)', num: detalle.falls, den: detalle.totalPatients, fmt: 'rate' },
+      { label: 'Cumpl. CVC', num: detalle.cvcDone, den: detalle.cvcTotal, fmt: 'percent' },
+      { label: 'Cumpl. VM', num: detalle.vmDone, den: detalle.vmTotal, fmt: 'percent' },
+      { label: 'Cumpl. CUP', num: detalle.cupDone, den: detalle.cupTotal, fmt: 'percent' },
+      { label: 'Flebitis (CVP)', num: detalle.phlebitis, den: detalle.cvpTotal, fmt: 'percent' },
+      { label: 'Cumpl. PAE', num: detalle.paeDay + detalle.paeNight, den: detalle.paeTotal, fmt: 'percent' },
+      { label: 'Cumpl. Glasgow', num: detalle.consciousnessDay + detalle.consciousnessNight, den: detalle.consciousnessExpected, fmt: 'percent' },
     ];
-    principales.forEach(p => detalle.push(p));
-    if (last.extra) {
-      for (const key in last.extra) {
-        const extra = last.extra[key];
-        if (extra && extra.denominator !== undefined) {
-          detalle.push({
-            label: extra.label || key,
-            num: extra.numerator || 0,
-            den: extra.denominator || 0,
-            fmt: extra.format || 'percent'
-          });
-        }
-      }
-    }
-    detalle.forEach(ind => {
+
+    filas.forEach(ind => {
       let resultado = '—';
+      let val = 0;
       if (ind.den > 0) {
         const num = ind.num || 0;
         const den = ind.den || 0;
-        let val = 0;
         if (ind.fmt === 'percent') val = (num / den) * 100;
         else if (ind.fmt === 'rate') val = (num / den) * 1000;
-        else if (ind.fmt === 'avg') val = num / den;
-        else if (ind.fmt === 'ratio') val = num / den;
         else val = num / den;
         if (ind.fmt === 'percent') resultado = val.toFixed(1) + '%';
         else if (ind.fmt === 'rate') resultado = val.toFixed(1);
-        else if (ind.fmt === 'avg') resultado = val.toFixed(1) + ' min';
-        else if (ind.fmt === 'ratio') resultado = val.toFixed(1) + ':1';
         else resultado = val.toFixed(1);
       }
-      html += `<tr><td><strong>${ind.label}</strong></td><td>${ind.num}</td><td>${ind.den}</td><td>${resultado}</td></tr>`;
+      const sem = obtenerSemaforo(ind.label, val, ind.den);
+      html += `<tr class="${sem.color}">
+        <td><strong>${ind.label}</strong></td>
+        <td>${ind.num}</td>
+        <td>${ind.den}</td>
+        <td>${resultado}</td>
+        <td>${sem.texto}</td>
+      </tr>`;
     });
+
     html += `</tbody></table></div></div></div>`;
+
     container.innerHTML = html;
 
+    // Renderizar gráfico
     setTimeout(() => {
       const ctx = document.getElementById('chartTodosIndicadores');
       if (ctx) {
@@ -615,16 +547,23 @@
           data: {
             labels: chartLabels,
             datasets: [{
-              label: 'Último mes',
+              label: displayMonth,
               data: chartData,
-              backgroundColor: chartLabels.map((_, i) => colors[i % colors.length])
+              backgroundColor: colors,
+              borderRadius: 6,
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y.toFixed(1) + '%' } } },
-            scales: { y: { beginAtZero: true, title: { display: true, text: '%' } } }
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: ctx => ctx.parsed.y.toFixed(1) + '%' } }
+            },
+            scales: {
+              y: { beginAtZero: true, title: { display: true, text: '%' } },
+              x: { ticks: { font: { size: 10 } } }
+            }
           }
         });
       }
@@ -632,7 +571,7 @@
   }
 
   // ================================================================
-  // REPORTE TRIMESTRAL COMPLETO
+  // REPORTE TRIMESTRAL
   // ================================================================
   async function renderReport(ward) {
     const container = document.getElementById('reportContent');
@@ -681,38 +620,24 @@
         }
       });
       const totalPatients = sum.totalPatients || 0;
+      const lppEval = sum.lppEvaluated || 0;
+      const cvpTotal = sum.cvpTotal || 0;
+      const admissions = sum.admissions || 0;
+      const glasgowExpected = sum.consciousnessExpected || 0;
       const ind = {
         totalPatients: totalPatients,
-        coberturaLPP: totalPatients > 0 ? ((sum.lppEvaluated || 0) / totalPatients * 100) : 0,
-        incidenciaLPP: totalPatients > 0 ? ((sum.lppIncidence || 0) / totalPatients * 100) : 0,
+        admissions: admissions,
+        coberturaLPP: admissions > 0 ? ((sum.lppEvaluated || 0) / admissions * 100) : 0,
+        incidenciaLPP: lppEval > 0 ? ((sum.lppIncidence || 0) / lppEval * 100) : 0,
         tasaEA: totalPatients > 0 ? ((sum.adverseEvents || 0) / totalPatients * 1000) : 0,
         tasaCaidas: totalPatients > 0 ? ((sum.falls || 0) / totalPatients * 1000) : 0,
         cumplimientoCVC: (sum.cvcTotal || 0) > 0 ? ((sum.cvcDone || 0) / (sum.cvcTotal || 0) * 100) : 0,
         cumplimientoVM: (sum.vmTotal || 0) > 0 ? ((sum.vmDone || 0) / (sum.vmTotal || 0) * 100) : 0,
         cumplimientoCUP: (sum.cupTotal || 0) > 0 ? ((sum.cupDone || 0) / (sum.cupTotal || 0) * 100) : 0,
-        incidenciaFlebitis: (sum.cvpTotal || 0) > 0 ? ((sum.phlebitis || 0) / (sum.cvpTotal || 0) * 100) : 0,
+        incidenciaFlebitis: cvpTotal > 0 ? ((sum.phlebitis || 0) / cvpTotal * 100) : 0,
         cumplimientoPAE: (sum.paeTotal || 0) > 0 ? (((sum.paeDay || 0) + (sum.paeNight || 0)) / (sum.paeTotal || 0) * 100) : 0,
-        conciencia: totalPatients > 0 ? ((sum.consciousness || 0) / totalPatients * 100) : 0,
-        paeDayTotal: sum.paeDay || 0,
-        paeNightTotal: sum.paeNight || 0,
-        extra: {}
+        cumplimientoGlasgow: glasgowExpected > 0 ? (((sum.consciousnessDay || 0) + (sum.consciousnessNight || 0)) / glasgowExpected * 100) : 0,
       };
-      const extras = getExtraFields(ward);
-      extras.forEach(extraKey => {
-        const def = EXTRA_INDICATORS[extraKey];
-        if (!def) return;
-        const num = sum[def.numerator] || 0;
-        const den = sum[def.denominator] || 0;
-        let result = 0;
-        if (den > 0) {
-          if (def.format === 'percent') result = (num / den) * 100;
-          else if (def.format === 'rate') result = (num / den) * 1000;
-          else if (def.format === 'avg') result = num / den;
-          else if (def.format === 'ratio') result = num / den;
-          else result = num / den;
-        }
-        ind.extra[extraKey] = { numerator: num, denominator: den, result, format: def.format, label: def.label };
-      });
       quarterData[q] = ind;
     });
 
@@ -733,29 +658,8 @@
       { label: 'Cumpl. CUP', key: 'cumplimientoCUP', fmt: v => (v).toFixed(1)+'%' },
       { label: 'Flebitis (CVP)', key: 'incidenciaFlebitis', fmt: v => (v).toFixed(1)+'%' },
       { label: 'Cumpl. PAE (D+N)', key: 'cumplimientoPAE', fmt: v => (v).toFixed(1)+'%' },
-      { label: 'PAE Día', key: 'paeDayTotal', fmt: v => v },
-      { label: 'PAE Noche', key: 'paeNightTotal', fmt: v => v },
-      { label: 'Conciencia', key: 'conciencia', fmt: v => (v).toFixed(1)+'%' }
+      { label: 'Cumpl. Glasgow', key: 'cumplimientoGlasgow', fmt: v => (v).toFixed(1)+'%' },
     ];
-
-    const extrasKeys = getExtraFields(ward);
-    extrasKeys.forEach(extraKey => {
-      const def = EXTRA_INDICATORS[extraKey];
-      if (def) {
-        rows.push({
-          label: def.label,
-          key: extraKey,
-          fmt: v => {
-            if (def.format === 'percent') return (v).toFixed(1)+'%';
-            if (def.format === 'rate') return (v).toFixed(1);
-            if (def.format === 'avg') return (v).toFixed(1)+' min';
-            if (def.format === 'ratio') return (v).toFixed(1)+':1';
-            return (v).toFixed(1);
-          },
-          isExtra: true
-        });
-      }
-    });
 
     rows.forEach(row => {
       html += `<tr><td><strong>${row.label}</strong></td>`;
@@ -763,12 +667,7 @@
         const qData = quarterData[q];
         let val = 0;
         if (qData) {
-          if (row.isExtra) {
-            const extra = qData.extra && qData.extra[row.key];
-            val = extra ? extra.result : 0;
-          } else {
-            val = qData[row.key] !== undefined ? qData[row.key] : 0;
-          }
+          val = qData[row.key] !== undefined ? qData[row.key] : 0;
         }
         html += `<td>${row.fmt(val)}</td>`;
       });
@@ -793,7 +692,7 @@
   }
 
   // ================================================================
-  // RENDERIZAR ÚLTIMOS REGISTROS
+  // ÚLTIMOS REGISTROS
   // ================================================================
   async function renderLastEntries() {
     const container = document.getElementById('lastEntries');
@@ -803,7 +702,7 @@
       return;
     }
     let html = `<div class="table-responsive"><table class="table table-sm table-bordered">
-      <thead><tr><th>Fecha</th><th>Inicio</th><th>Ingresos</th><th>Egresos</th><th>Total</th><th>LPP Eval</th><th>Caídas</th><th>PAE Día</th><th>PAE Noche</th><th>Acción</th></tr></thead><tbody>`;
+      <thead><tr><th>Fecha</th><th>Inicio</th><th>Ingresos</th><th>Egresos</th><th>Total</th><th>LPP Eval</th><th>Caídas</th><th>PAE Día</th><th>PAE Noche</th><th>Glasgow Día</th><th>Glasgow Noche</th><th>Acción</th></tr></thead><tbody>`;
     data.slice(0, 15).forEach(r => {
       html += `<tr>
         <td>${r.date}</td>
@@ -815,6 +714,8 @@
         <td>${r.falls}</td>
         <td>${r.paeDay||0}</td>
         <td>${r.paeNight||0}</td>
+        <td>${r.consciousnessDay||0}</td>
+        <td>${r.consciousnessNight||0}</td>
         <td><button class="btn-delete-record" onclick="deleteRecord('${r.date}','${r.ward}')"><i class="fas fa-trash-alt"></i></button></td>
       </tr>`;
     });
@@ -853,15 +754,36 @@
     if (!date) { alert('Selecciona una fecha.'); return; }
     updateTotal();
     const totalPatients = parseInt(document.getElementById('totalPatients').value) || 0;
+    const admissions = parseInt(document.getElementById('admissions').value) || 0;
+
+    const lppEval = parseInt(document.getElementById('lppEvaluated').value) || 0;
+    const lppInc = parseInt(document.getElementById('lppIncidence').value) || 0;
+    const paeDay = parseInt(document.getElementById('paeDay').value) || 0;
+    const paeNight = parseInt(document.getElementById('paeNight').value) || 0;
+    const paeTotal = parseInt(document.getElementById('paeTotal').value) || 0;
+    const glasgowDay = parseInt(document.getElementById('consciousnessDay').value) || 0;
+    const glasgowNight = parseInt(document.getElementById('consciousnessNight').value) || 0;
+    const glasgowExpected = parseInt(document.getElementById('consciousnessExpected').value) || 0;
+
+    let errors = [];
+    if (lppEval > admissions) errors.push('Evaluados LPP no puede ser mayor que Ingresos del día.');
+    if (lppInc > lppEval) errors.push('LPP (>48h) no puede ser mayor que Evaluados LPP.');
+    if (paeDay + paeNight > paeTotal) errors.push('PAE ejecutados no puede ser mayor que PAE que debieron registrarse.');
+    if (glasgowDay + glasgowNight > glasgowExpected) errors.push('Glasgow registradas no puede ser mayor que Glasgow que debieron registrarse.');
+
+    if (errors.length > 0) {
+      alert('⚠️ Datos inconsistentes:\n' + errors.join('\n') + '\n\nCorrige los valores antes de guardar.');
+      return;
+    }
 
     const record = {
       date, ward: FIXED_WARD,
       startPatients: parseInt(document.getElementById('startPatients').value) || 0,
-      admissions: parseInt(document.getElementById('admissions').value) || 0,
+      admissions: admissions,
       discharges: parseInt(document.getElementById('discharges').value) || 0,
       totalPatients,
-      lppEvaluated: parseInt(document.getElementById('lppEvaluated').value) || 0,
-      lppIncidence: parseInt(document.getElementById('lppIncidence').value) || 0,
+      lppEvaluated: lppEval,
+      lppIncidence: lppInc,
       adverseEvents: parseInt(document.getElementById('adverseEvents').value) || 0,
       falls: parseInt(document.getElementById('falls').value) || 0,
       cvcDone: parseInt(document.getElementById('cvcDone').value) || 0,
@@ -872,10 +794,10 @@
       cupTotal: parseInt(document.getElementById('cupTotal').value) || 0,
       cvpTotal: parseInt(document.getElementById('cvpTotal').value) || 0,
       phlebitis: parseInt(document.getElementById('phlebitis').value) || 0,
-      paeDay: parseInt(document.getElementById('paeDay').value) || 0,
-      paeNight: parseInt(document.getElementById('paeNight').value) || 0,
-      paeTotal: parseInt(document.getElementById('paeTotal').value) || 0,
-      consciousness: parseInt(document.getElementById('consciousness').value) || 0,
+      paeDay, paeNight, paeTotal,
+      consciousnessDay: glasgowDay,
+      consciousnessNight: glasgowNight,
+      consciousnessExpected: glasgowExpected,
       extra: {}
     };
 
@@ -916,6 +838,11 @@
         el.addEventListener('input', updateTotal);
         el.addEventListener('change', updateTotal);
       }
+    });
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
     });
   });
 </script>

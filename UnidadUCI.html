@@ -1,929 +1,1062 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calidad Enfermería - Unidad UCI</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    /* ===== ESTILOS (igual que antes) ===== */
-    body { background: linear-gradient(135deg, #f0f7fc 0%, #e6f0f9 100%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .navbar-custom { background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 12px 0; }
-    .navbar-brand { font-weight: 700; font-size: 1.5rem; color: #0a3d62 !important; }
-    .navbar-brand i { color: #2c7da0; }
-    .badge-ward { background: #2c7da0; color: white; padding: 8px 20px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; }
-    .card { border: none; border-radius: 18px; box-shadow: 0 8px 25px rgba(0,0,0,0.04); margin-bottom: 24px; background: white; transition: transform 0.2s; }
-    .card:hover { transform: translateY(-2px); }
-    .card-header { background: white; border-bottom: 2px solid #eef2f7; font-weight: 600; color: #0a3d62; padding: 16px 20px; border-radius: 18px 18px 0 0 !important; }
-    .card-header i { color: #2c7da0; margin-right: 8px; }
-    .kpi-card { background: white; border-radius: 14px; padding: 18px 20px; border-left: 6px solid #0a3d62; box-shadow: 0 4px 12px rgba(0,0,0,0.02); height: 100%; transition: 0.3s; position: relative; }
-    .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.06); }
-    .kpi-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.3px; color: #6c757d; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-    .kpi-label i { color: #2c7da0; font-size: 0.9rem; cursor: help; }
-    .kpi-value { font-size: 2rem; font-weight: 700; color: #0a3d62; line-height: 1.2; }
-    .kpi-unit { font-size: 0.9rem; color: #6c757d; margin-left: 4px; }
-    .table-indicators th { background: #0a3d62; color: white; font-weight: 500; font-size: 0.8rem; text-align: center; vertical-align: middle; }
-    .table-indicators td { text-align: center; vertical-align: middle; font-size: 0.85rem; }
-    .table-indicators tr:nth-child(even) { background: #f9fcff; }
-    .nav-tabs .nav-link { color: #495057; font-weight: 500; border: none; border-bottom: 3px solid transparent; }
-    .nav-tabs .nav-link.active { color: #0a3d62; border-bottom: 3px solid #0a3d62; background: transparent; }
-    .nav-tabs .nav-link:hover { border-bottom-color: #2c7da0; color: #2c7da0; }
-    .chart-container { position: relative; height: 250px; width: 100%; margin-bottom: 20px; }
-    .form-label { font-weight: 600; color: #343a40; font-size: 0.9rem; }
-    .form-control { border-radius: 30px; border: 1px solid #dce4ec; padding: 6px 16px; }
-    .form-control:focus { border-color: #2c7da0; box-shadow: 0 0 0 0.2rem rgba(44,125,160,0.2); }
-    .btn-primary { background: #0a3d62; border: none; border-radius: 30px; padding: 10px 30px; font-weight: 600; transition: 0.3s; }
-    .btn-primary:hover { background: #062a44; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(10,61,98,0.3); }
-    .btn-delete-record { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 1.1rem; }
-    .btn-delete-record:hover { color: #a71d2a; }
-    .extra-fields-container .col-md-3 { margin-bottom: 10px; }
-    .alert-fixed { background: #d4edda; border-color: #c3e6cb; color: #155724; border-radius: 30px; padding: 10px 20px; margin-bottom: 20px; }
-    .alert-fixed i { margin-right: 10px; }
-    .alert-warning-dashboard { background: #fff3cd; border-left: 6px solid #ffc107; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
-    .indicador-tabla th { background: #0a3d62; color: white; font-weight: 500; font-size: 0.85rem; text-align: center; vertical-align: middle; }
-    .indicador-tabla td { text-align: center; vertical-align: middle; font-size: 0.9rem; }
-    .table-sm th, .table-sm td { padding: 6px 8px; font-size: 0.85rem; }
-    .help-icon { color: #2c7da0; cursor: help; margin-left: 4px; font-size: 0.85rem; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calidad Enfermería - Unidad UCI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background: linear-gradient(135deg, #f0f7fc 0%, #e6f0f9 100%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-custom { background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 12px 0; }
+        .navbar-brand { font-weight: 700; font-size: 1.5rem; color: #0a3d62 !important; }
+        .navbar-brand i { color: #2c7da0; }
+        .badge-ward { background: #2c7da0; color: white; padding: 8px 20px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; }
+        .card { border: none; border-radius: 18px; box-shadow: 0 8px 25px rgba(0,0,0,0.04); margin-bottom: 24px; background: white; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-2px); }
+        .card-header { background: white; border-bottom: 2px solid #eef2f7; font-weight: 600; color: #0a3d62; padding: 16px 20px; border-radius: 18px 18px 0 0 !important; }
+        .card-header i { color: #2c7da0; margin-right: 8px; }
+        .kpi-card { background: white; border-radius: 14px; padding: 18px 20px; border-left: 6px solid #0a3d62; box-shadow: 0 4px 12px rgba(0,0,0,0.02); height: 100%; transition: 0.3s; position: relative; }
+        .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.06); }
+        .kpi-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px; color: #6c757d; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        .kpi-label i { color: #2c7da0; font-size: 0.9rem; cursor: help; }
+        .kpi-value { font-size: 1.8rem; font-weight: 700; color: #0a3d62; line-height: 1.2; }
+        .kpi-unit { font-size: 0.9rem; color: #6c757d; margin-left: 4px; }
+        .table-indicators th { background: #0a3d62; color: white; font-weight: 500; font-size: 0.8rem; text-align: center; vertical-align: middle; }
+        .table-indicators td { text-align: center; vertical-align: middle; font-size: 0.85rem; }
+        .table-indicators tr:nth-child(even) { background: #f9fcff; }
+        .nav-tabs .nav-link { color: #495057; font-weight: 500; border: none; border-bottom: 3px solid transparent; }
+        .nav-tabs .nav-link.active { color: #0a3d62; border-bottom: 3px solid #0a3d62; background: transparent; }
+        .nav-tabs .nav-link:hover { border-bottom-color: #2c7da0; color: #2c7da0; }
+        .chart-container { position: relative; height: 250px; width: 100%; margin-bottom: 20px; }
+        .form-label { font-weight: 600; color: #343a40; font-size: 0.85rem; }
+        .form-control { border-radius: 30px; border: 1px solid #dce4ec; padding: 6px 16px; }
+        .form-control:focus { border-color: #2c7da0; box-shadow: 0 0 0 0.2rem rgba(44,125,160,0.2); }
+        .btn-primary { background: #0a3d62; border: none; border-radius: 30px; padding: 10px 30px; font-weight: 600; transition: 0.3s; }
+        .btn-primary:hover { background: #062a44; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(10,61,98,0.3); }
+        .btn-delete-record { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 1.1rem; }
+        .btn-delete-record:hover { color: #a71d2a; }
+        .extra-fields-container .col-md-3 { margin-bottom: 10px; }
+        .alert-fixed { background: #d4edda; border-color: #c3e6cb; color: #155724; border-radius: 30px; padding: 10px 20px; margin-bottom: 20px; }
+        .alert-fixed i { margin-right: 10px; }
+        .alert-warning-dashboard { background: #fff3cd; border-left: 6px solid #ffc107; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+        .indicador-tabla th { background: #0a3d62; color: white; font-weight: 500; font-size: 0.85rem; text-align: center; vertical-align: middle; }
+        .indicador-tabla td { text-align: center; vertical-align: middle; font-size: 0.9rem; }
+        .table-sm th, .table-sm td { padding: 6px 8px; font-size: 0.85rem; }
+        .help-icon { color: #2c7da0; cursor: help; margin-left: 4px; font-size: 0.85rem; }
+        .status-green { background-color: #d4edda; color: #155724; }
+        .status-yellow { background-color: #fff3cd; color: #856404; }
+        .status-red { background-color: #f8d7da; color: #721c24; }
+        .status-neutral { background-color: #f8f9fa; color: #6c757d; }
+        .sem-foro-texto { font-size: 0.7rem; font-weight: 600; display: block; margin-top: 2px; }
+        .section-title { color: #0a3d62; font-weight: 600; font-size: 1.1rem; margin-top: 15px; margin-bottom: 10px; border-bottom: 2px solid #eef2f7; padding-bottom: 5px; }
+    </style>
 </head>
 <body>
 
 <nav class="navbar-custom">
-  <div class="container d-flex justify-content-between align-items-center">
-    <span class="navbar-brand"><i class="fas fa-heartbeat me-2"></i>Calidad Enfermería</span>
-    <span class="badge-ward" id="wardDisplay"><i class="fas fa-hospital me-1"></i> Unidad UCI</span>
-  </div>
+    <div class="container d-flex justify-content-between align-items-center">
+        <span class="navbar-brand"><i class="fas fa-heartbeat me-2"></i>Calidad Enfermería</span>
+        <span class="badge-ward" id="wardDisplay"><i class="fas fa-hospital me-1"></i> Unidad UCI</span>
+    </div>
 </nav>
 
 <div class="container mt-4">
-  <div class="alert-fixed">
-    <i class="fas fa-lock"></i> Sala fija: <strong>Unidad UCI</strong> – Los datos son privados para esta sala.
-  </div>
+    <div class="alert-fixed">
+        <i class="fas fa-lock"></i> Sala fija: <strong>Unidad UCI</strong> – Los datos son privados para esta sala.
+    </div>
 
-  <ul class="nav nav-tabs" id="myTab" role="tablist">
-    <li class="nav-item"><button class="nav-link active" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab"><i class="fas fa-pen me-2"></i>Registro Diario</button></li>
-    <li class="nav-item"><button class="nav-link" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab"><i class="fas fa-chart-line me-2"></i>Dashboard</button></li>
-    <li class="nav-item"><button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report" type="button" role="tab"><i class="fas fa-file-alt me-2"></i>Reporte Trimestral</button></li>
-  </ul>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item"><button class="nav-link active" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab"><i class="fas fa-pen me-2"></i>Registro Diario</button></li>
+        <li class="nav-item"><button class="nav-link" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab"><i class="fas fa-chart-line me-2"></i>Dashboard</button></li>
+        <li class="nav-item"><button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report" type="button" role="tab"><i class="fas fa-file-alt me-2"></i>Reporte Trimestral</button></li>
+    </ul>
 
-  <div class="tab-content" id="myTabContent">
-    <!-- REGISTRO DIARIO -->
-    <div class="tab-pane fade show active" id="register" role="tabpanel">
-      <div class="card">
-        <div class="card-header"><i class="fas fa-calendar-day"></i> Registrar Datos del Día</div>
-        <div class="card-body">
-          <form id="dailyForm">
-            <div class="row g-3">
-              <div class="col-md-3"><label class="form-label">Fecha</label><input type="date" class="form-control" id="regDate" required></div>
-              <input type="hidden" id="regWard" value="Unidad UCI">
+    <div class="tab-content" id="myTabContent">
+        <!-- REGISTRO DIARIO -->
+        <div class="tab-pane fade show active" id="register" role="tabpanel">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-calendar-day"></i> Registrar Datos del Día</div>
+                <div class="card-body">
+                    <form id="dailyForm">
+                        <div class="row g-3">
+                            <div class="col-md-3"><label class="form-label">Fecha</label><input type="date" class="form-control" id="regDate" required></div>
+                            <input type="hidden" id="regWard" value="Unidad UCI">
 
-              <div class="col-md-3"><label class="form-label">Pacientes al inicio del día</label><input type="number" class="form-control" id="startPatients" value="0" min="0" required></div>
-              <div class="col-md-3"><label class="form-label">Ingresos del día</label><input type="number" class="form-control" id="admissions" value="0" min="0"></div>
-              <div class="col-md-3"><label class="form-label">Egresos del día</label><input type="number" class="form-control" id="discharges" value="0" min="0"></div>
-              <div class="col-md-3"><label class="form-label">Total pacientes (calculado)</label><input type="number" class="form-control" id="totalPatients" readonly style="background:#e9ecef; font-weight:bold;"></div>
+                            <div class="col-md-3"><label class="form-label">Pacientes al inicio del día</label><input type="number" class="form-control" id="startPatients" value="0" min="0" required></div>
+                            <div class="col-md-3"><label class="form-label">Ingresos del día</label><input type="number" class="form-control" id="admissions" value="0" min="0"></div>
+                            <div class="col-md-3"><label class="form-label">Egresos del día</label><input type="number" class="form-control" id="discharges" value="0" min="0"></div>
+                            <div class="col-md-3"><label class="form-label">Total pacientes (calculado)</label><input type="number" class="form-control" id="totalPatients" readonly style="background:#e9ecef; font-weight:bold;"></div>
 
-              <div id="commonIndicators" class="row g-3">
-                <div class="col-md-3"><label class="form-label">Evaluados Riesgo LPP</label><input type="number" class="form-control" id="lppEvaluated" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">LPP (>48h)</label><input type="number" class="form-control" id="lppIncidence" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">Eventos Adversos</label><input type="number" class="form-control" id="adverseEvents" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">Caídas</label><input type="number" class="form-control" id="falls" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">CVC Ejec.</label><input type="number" class="form-control" id="cvcDone" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">CVC Oport.</label><input type="number" class="form-control" id="cvcTotal" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">VM Ejec.</label><input type="number" class="form-control" id="vmDone" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">VM Oport.</label><input type="number" class="form-control" id="vmTotal" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">CUP Ejec.</label><input type="number" class="form-control" id="cupDone" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">CUP Oport.</label><input type="number" class="form-control" id="cupTotal" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">Pacientes con CVP</label><input type="number" class="form-control" id="cvpTotal" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">Flebitis (CVP)</label><input type="number" class="form-control" id="phlebitis" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label" style="color:#17a2b8;">PAE DÍA</label><input type="number" class="form-control" id="paeDay" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label" style="color:#6f42c1;">PAE NOCHE</label><input type="number" class="form-control" id="paeNight" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">PAE Evaluados (Oport.)</label><input type="number" class="form-control" id="paeTotal" value="0" min="0"></div>
-                <div class="col-md-3"><label class="form-label">Evaluación Conciencia</label><input type="number" class="form-control" id="consciousness" value="0" min="0"></div>
-              </div>
+                            <!-- INDICADORES COMUNES (1 al 10) -->
+                            <div class="row g-3">
+                                <div class="col-12"><h6 class="section-title"><i class="fas fa-clipboard-list me-2"></i>Indicadores Comunes</h6></div>
+                                <div class="col-md-3"><label class="form-label">N° pacientes ingresados EVALUADOS con escala de riesgo LPP</label><input type="number" class="form-control" id="lppEvaluated" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° pacientes que desarrollan LPP (durante su estancia)</label><input type="number" class="form-control" id="lppIncidence" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° Eventos Adversos notificados en el día</label><input type="number" class="form-control" id="adverseEvents" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° Caídas ocurridas en el día</label><input type="number" class="form-control" id="falls" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° Cuidados CVC realizados en el día</label><input type="number" class="form-control" id="cvcDone" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° Oportunidades de cuidado CVC en el día</label><input type="number" class="form-control" id="cvcTotal" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° Cuidados VM realizados en el día</label><input type="number" class="form-control" id="vmDone" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° Oportunidades de cuidado VM en el día</label><input type="number" class="form-control" id="vmTotal" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° Cuidados CUP realizados en el día</label><input type="number" class="form-control" id="cupDone" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° Oportunidades de cuidado CUP en el día</label><input type="number" class="form-control" id="cupTotal" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° Pacientes con CVP en el día</label><input type="number" class="form-control" id="cvpTotal" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° Flebitis (CVP) en el día</label><input type="number" class="form-control" id="phlebitis" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label" style="color:#17a2b8;">N° PAE ejecutados en el turno día</label><input type="number" class="form-control" id="paeDay" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label" style="color:#6f42c1;">N° PAE ejecutados en el turno noche</label><input type="number" class="form-control" id="paeNight" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° Total PAE que debieron registrarse (día + noche)</label><input type="number" class="form-control" id="paeTotal" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label" style="color:#007bff;">N° Glasgow registradas en el turno día</label><input type="number" class="form-control" id="consciousnessDay" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label" style="color:#6610f2;">N° Glasgow registradas en el turno noche</label><input type="number" class="form-control" id="consciousnessNight" value="0" min="0"></div>
+                                <div class="col-md-3"><label class="form-label">N° Total Glasgow que debieron registrarse (día + noche)</label><input type="number" class="form-control" id="consciousnessExpected" value="0" min="0"></div>
+                            </div>
 
-              <!-- CAMPOS EXTRAS: UCI -->
-              <div id="extraFieldsContainer" class="row g-3 mt-2 extra-fields-container"></div>
+                            <!-- INDICADORES ADICIONALES UCI (11 al 21) -->
+                            <div id="extraFieldsContainer" class="row g-3 mt-3"></div>
 
-              <div class="col-12 mt-3">
-                <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save me-2"></i> Guardar Registro</button>
-              </div>
+                            <div class="col-12 mt-3">
+                                <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save me-2"></i> Guardar Registro</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="registerFeedback" class="mt-3"></div>
+                </div>
             </div>
-          </form>
-          <div id="registerFeedback" class="mt-3"></div>
+
+            <div class="card mt-3">
+                <div class="card-header"><i class="fas fa-table me-2"></i>Indicadores del último registro</div>
+                <div class="card-body" id="ultimoRegistroIndicadores" style="max-height: 400px; overflow-y: auto;">
+                    <p class="text-muted">Aún no hay registros.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><i class="fas fa-history"></i> Últimos Registros</div>
+                <div class="card-body" id="lastEntries" style="max-height: 300px; overflow-y: auto;"><p class="text-muted">Aún no hay registros.</p></div>
+            </div>
         </div>
-      </div>
 
-      <div class="card mt-3">
-        <div class="card-header"><i class="fas fa-table me-2"></i>Indicadores del último registro</div>
-        <div class="card-body" id="ultimoRegistroIndicadores" style="max-height: 400px; overflow-y: auto;">
-          <p class="text-muted">Aún no hay registros.</p>
+        <!-- DASHBOARD -->
+        <div class="tab-pane fade" id="dashboard" role="tabpanel">
+            <div id="dashboardContent"><div class="alert alert-info">Cargando indicadores...</div></div>
         </div>
-      </div>
 
-      <div class="card">
-        <div class="card-header"><i class="fas fa-history"></i> Últimos Registros</div>
-        <div class="card-body" id="lastEntries" style="max-height: 300px; overflow-y: auto;"><p class="text-muted">Aún no hay registros.</p></div>
-      </div>
+        <!-- REPORTE -->
+        <div class="tab-pane fade" id="report" role="tabpanel">
+            <div id="reportContent"><div class="alert alert-info">Cargando reporte...</div></div>
+        </div>
     </div>
-
-    <!-- DASHBOARD -->
-    <div class="tab-pane fade" id="dashboard" role="tabpanel">
-      <div id="dashboardContent"><div class="alert alert-info">Cargando indicadores...</div></div>
-    </div>
-
-    <!-- REPORTE -->
-    <div class="tab-pane fade" id="report" role="tabpanel">
-      <div id="reportContent"><div class="alert alert-info">Cargando reporte...</div></div>
-    </div>
-  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+</script>
 <script>
-  // ================================================================
-  // CONFIGURACIÓN SUPABASE
-  // ================================================================
-  const SUPABASE_URL = 'https://hdhqzawcylkvttsqqjty.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_x5r7hUrN2pzVexbtZ_b0Wg_OBDEMAKP';
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ================================================================
+    // CONFIGURACIÓN SUPABASE
+    // ================================================================
+    const SUPABASE_URL = 'https://hdhqzawcylkvttsqqjty.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_x5r7hUrN2pzVexbtZ_b0Wg_OBDEMAKP';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const FIXED_WARD = 'Unidad UCI';
 
-  // ================================================================
-  // SALA FIJA
-  // ================================================================
-  const FIXED_WARD = 'Unidad UCI';
-
-  // ================================================================
-  // CONFIGURACIÓN DE INDICADORES POR SALA
-  // ================================================================
-  const WARD_CONFIG = {
-    'Sala San Jose': { extras: [] },
-    'Sala San Luis': { extras: [] },
-    'Sala San Vicente': { extras: [] },
-    'Sala Inmaculada': { extras: [] },
-    'Sala Santa Ana': { extras: ['aspiration'] },
-    'Sala La Virgen': { extras: ['wells', 'dysphagia'] },
-    'Sala Jesus Maria': { extras: ['aspiration'] },
-    'Sala El Rosario': { extras: ['surgery'] },
-    'Sala Corazon de Jesus': { extras: ['surgery'] },
-    'Sala San Miguel': { extras: ['surgery'] },
-    'Unidad UCI': { extras: ['uci_advanced'] },
-    'Unidad UCIN': { extras: ['uci_advanced'] },
-    'Emergencia': { extras: ['emergency_advanced'] }
-  };
-
-  // ================================================================
-  // FUNCIÓN PARA GENERAR CAMPOS EXTRAS (EXACTAMENTE COMO TU ORIGINAL)
-  // ================================================================
-  function getExtraFields(ward) {
-    const config = WARD_CONFIG[ward];
-    if (!config) return [];
-    const extras = config.extras;
-    let fields = [];
-
-    if (extras.includes('aspiration')) {
-      fields.push(
-        { id: 'aspirationRisk', label: 'Pacientes con Riesgo de Aspiración' },
-        { id: 'aspirationEvent', label: 'Eventos de Aspiración' }
-      );
-    }
-    if (extras.includes('wells')) {
-      fields.push(
-        { id: 'wellsApplied', label: 'Pacientes evaluados con Wells (TVP)' },
-        { id: 'wellsTotal', label: 'Total pacientes con riesgo TVP' }
-      );
-    }
-    if (extras.includes('dysphagia')) {
-      fields.push(
-        { id: 'dysphagiaApplied', label: 'Pacientes evaluados con Test de Disfagia' },
-        { id: 'dysphagiaTotal', label: 'Total pacientes con riesgo Disfagia' }
-      );
-    }
-    if (extras.includes('surgery')) {
-      fields.push(
-        { id: 'surgeryDone', label: 'Cirugías Realizadas (N°)' },
-        { id: 'surgeryTotal', label: 'Cirugías Programadas (N°)' }
-      );
-    }
-    if (extras.includes('uci_advanced')) {
-      fields.push(
-        { id: 'hoursNursing', label: 'Horas de Enfermería (UCI) – Total día (24h)' },
-        { id: 'patientsTurnDay', label: 'Pacientes en turno día (12h)' },
-        { id: 'patientsTurnNight', label: 'Pacientes en turno noche (12h)' },
-        { id: 'vmDays', label: 'Días de Ventilación Mecánica – N° pacientes con VM (ej. 7)' },
-        { id: 'vapCases', label: 'Casos VAP confirmados (del día)' },
-        { id: 'raCvc', label: 'Retiro accidental CVC/CVP (N°)' },
-        { id: 'raTet', label: 'Retiro accidental TET (N°)' },
-        { id: 'raSng', label: 'Retiro accidental SNG (N°)' },
-        { id: 'raCup', label: 'Retiro accidental CUP (N°)' },
-        { id: 'pacCvc', label: 'Total pacientes con CVC/CVP (denominador)' },
-        { id: 'pacTet', label: 'Total pacientes con TET (denominador)' },
-        { id: 'pacSng', label: 'Total pacientes con SNG (denominador)' },
-        { id: 'pacCup', label: 'Total pacientes con CUP (denominador)' },
-        { id: 'sedationTotal', label: 'Pacientes bajo sedación/analgesia' },
-        { id: 'sedationEvaluated', label: 'Sedación evaluada con escala' },
-        { id: 'picTotal', label: 'Pacientes con monitorización PIC' },
-        { id: 'picRegistered', label: 'PIC con vigilancia y registro' },
-        { id: 'surveyApplied', label: 'Encuestas aplicadas' },
-        { id: 'surveySatisfied', label: 'Encuestas satisfactorias' }
-      );
-    }
-    if (extras.includes('emergency_advanced')) {
-      // (Emergencia se maneja aparte)
-    }
-    return fields;
-  }
-
-  // ================================================================
-  // GESTIÓN DE DATOS (FULL SUPABASE)
-  // ================================================================
-  async function getData() {
-    const { data, error } = await supabaseClient
-      .from("REGISTROS")
-      .select("*")
-      .eq("ward", FIXED_WARD)
-      .order("date", { ascending: true });
-    if (error) { console.error(error); return []; }
-    return data.map(row => row.data);
-  }
-
-  async function saveData(record) {
-    const { data: existing, error: checkError } = await supabaseClient
-      .from("REGISTROS")
-      .select("id")
-      .eq("date", record.date)
-      .eq("ward", FIXED_WARD)
-      .maybeSingle();
-    if (checkError) { console.error(checkError); alert("Error de verificación"); return false; }
-    if (existing) {
-      const { error } = await supabaseClient
-        .from("REGISTROS")
-        .update({ data: record })
-        .eq("id", existing.id);
-      if (error) { console.error(error); alert("Error al actualizar"); return false; }
-    } else {
-      const { error } = await supabaseClient
-        .from("REGISTROS")
-        .insert({ date: record.date, ward: FIXED_WARD, data: record });
-      if (error) { console.error(error); alert("Error al insertar"); return false; }
-    }
-    return true;
-  }
-
-  function getWard() { return FIXED_WARD; }
-
-  // ================================================================
-  // FUNCIONES AUXILIARES
-  // ================================================================
-  function updateTotal() {
-    const start = parseInt(document.getElementById('startPatients').value) || 0;
-    const adm = parseInt(document.getElementById('admissions').value) || 0;
-    const dis = parseInt(document.getElementById('discharges').value) || 0;
-    document.getElementById('totalPatients').value = Math.max(0, start + adm - dis);
-  }
-
-  function renderExtraFields(ward) {
-    const container = document.getElementById('extraFieldsContainer');
-    container.innerHTML = '';
-    const fields = getExtraFields(ward);
-    if (fields.length === 0) {
-      container.innerHTML = '<div class="col-12 text-muted">No hay indicadores adicionales.</div>';
-      return;
-    }
-    fields.forEach(f => {
-      const col = document.createElement('div');
-      col.className = 'col-md-3';
-      col.innerHTML = `<label class="form-label">${f.label}</label><input type="number" class="form-control" id="${f.id}" value="0" min="0">`;
-      container.appendChild(col);
-    });
-  }
-
-  // ================================================================
-  // RENDERIZAR INDICADORES DEL ÚLTIMO REGISTRO
-  // ================================================================
-  function calcularIndicadores(record) {
-    const indicadores = {};
-    const totalPatients = record.totalPatients || 0;
-
-    // Indicadores comunes
-    const baseIndicators = [
-      { key: 'coberturaLPP', label: 'Cobertura LPP', num: record.lppEvaluated || 0, den: totalPatients, fmt: 'percent' },
-      { key: 'incidenciaLPP', label: 'Incidencia LPP', num: record.lppIncidence || 0, den: totalPatients, fmt: 'percent' },
-      { key: 'tasaEA', label: 'Tasa EA (x1000)', num: record.adverseEvents || 0, den: totalPatients, fmt: 'rate' },
-      { key: 'tasaCaidas', label: 'Tasa Caídas (x1000)', num: record.falls || 0, den: totalPatients, fmt: 'rate' },
-      { key: 'cumplimientoCVC', label: 'Cumpl. CVC', num: record.cvcDone || 0, den: record.cvcTotal || 0, fmt: 'percent' },
-      { key: 'cumplimientoVM', label: 'Cumpl. VM', num: record.vmDone || 0, den: record.vmTotal || 0, fmt: 'percent' },
-      { key: 'cumplimientoCUP', label: 'Cumpl. CUP', num: record.cupDone || 0, den: record.cupTotal || 0, fmt: 'percent' },
-      { key: 'incidenciaFlebitis', label: 'Flebitis (CVP)', num: record.phlebitis || 0, den: record.cvpTotal || 0, fmt: 'percent' },
-      { key: 'cumplimientoPAE', label: 'Cumpl. PAE', num: (record.paeDay || 0) + (record.paeNight || 0), den: record.paeTotal || 0, fmt: 'percent' },
-      { key: 'conciencia', label: 'Conciencia', num: record.consciousness || 0, den: totalPatients, fmt: 'percent' },
+    // ================================================================
+    // DEFINICIÓN DE CAMPOS ADICIONALES UCI (IDÉNTICO A UCIN)
+    // ================================================================
+    const UCIN_FIELDS = [
+        // Orden 11: Horas de Enfermería
+        { num: 'hoursNursing', numLabel: 'Suma total de horas de enfermería en 24h (día + noche)',
+            den: 'hoursNursingDen', denLabel: 'Total de pacientes hospitalizados en la UCI (24h)' },
+        // Orden 12: Ratio día
+        { num: 'patientsTurnDay', numLabel: 'N° de pacientes hospitalizados en el turno día (12h)',
+            den: 'nursesDay', denLabel: 'N° de enfermeras asistenciales en el turno día (12h)' },
+        // Orden 13: Ratio noche
+        { num: 'patientsTurnNight', numLabel: 'N° de pacientes hospitalizados en el turno noche (12h)',
+            den: 'nursesNight', denLabel: 'N° de enfermeras asistenciales en el turno noche (12h)' },
+        // Orden 14: VAP
+        { num: 'vapCases', numLabel: 'N° de casos VAP confirmados en el día', den: 'vmDays',
+            denLabel: 'N° de pacientes con Ventilación Mecánica en el día' },
+        // Orden 15: Sedación evaluada
+        { num: 'sedationEvaluated', numLabel: 'N° de pacientes con evaluación de sedación registrada (escala validada)',
+            den: 'sedationTotal', denLabel: 'N° total de pacientes bajo sedación/analgesia' },
+        // Orden 16: PIC vigilada
+        { num: 'picRegistered', numLabel: 'N° de pacientes con registro de PIC vigilado por enfermería',
+            den: 'picTotal', denLabel: 'N° total de pacientes con monitorización de presión intracraneal (PIC)' },
+        // Orden 17: Retiro CVC
+        { num: 'raCvc', numLabel: 'N° de retiros accidentales de CVC/CVP', den: 'pacCvc',
+            denLabel: 'Total de pacientes con CVC/CVP' },
+        // Orden 18: Retiro TET
+        { num: 'raTet', numLabel: 'N° de retiros accidentales de TET', den: 'pacTet',
+            denLabel: 'Total de pacientes con TET' },
+        // Orden 19: Retiro SNG/SOG
+        { num: 'raSng', numLabel: 'N° de retiros accidentales de SNG/SOG', den: 'pacSng',
+            denLabel: 'Total de pacientes con SNG/SOG' },
+        // Orden 20: Retiro CUP
+        { num: 'raCup', numLabel: 'N° de retiros accidentales de CUP', den: 'pacCup',
+            denLabel: 'Total de pacientes con CUP' },
+        // Orden 21: Encuestas satisfactorias
+        { num: 'surveySatisfied', numLabel: 'N° de encuestas con valoración satisfactoria o muy satisfactoria',
+            den: 'surveyApplied', denLabel: 'N° total de encuestas aplicadas' },
     ];
 
-    baseIndicators.forEach(ind => {
-      let result = 0;
-      if (ind.den > 0) {
-        if (ind.fmt === 'percent') result = (ind.num / ind.den) * 100;
-        else if (ind.fmt === 'rate') result = (ind.num / ind.den) * 1000;
-        else result = ind.num / ind.den;
-      }
-      indicadores[ind.key] = { label: ind.label, numerator: ind.num, denominator: ind.den, result, format: ind.fmt };
-    });
+    // ================================================================
+    // FUNCIONES AUXILIARES
+    // ================================================================
+    function renderExtraFields() {
+        const container = document.getElementById('extraFieldsContainer');
+        container.innerHTML =
+            '<div class="col-12"><h6 class="section-title"><i class="fas fa-plus-circle me-2"></i>Indicadores Específicos UCI</h6></div>';
 
-    // Indicadores UCI (extras)
-    const extra = record.extra || {};
-    const uciFields = [
-      { key: 'hoursNursing', label: 'Horas Enfermería', num: extra.hoursNursing || 0, den: 1, fmt: 'count' },
-      { key: 'pacientesTurnoDia', label: 'Pacientes turno día', num: extra.patientsTurnDay || 0, den: 1, fmt: 'count' },
-      { key: 'pacientesTurnoNoche', label: 'Pacientes turno noche', num: extra.patientsTurnNight || 0, den: 1, fmt: 'count' },
-      { key: 'vmDays', label: 'Días VM', num: extra.vmDays || 0, den: 1, fmt: 'count' },
-      { key: 'vapCases', label: 'Casos VAP', num: extra.vapCases || 0, den: 1, fmt: 'count' },
-      { key: 'raCvc', label: 'Retiros CVC/CVP', num: extra.raCvc || 0, den: 1, fmt: 'count' },
-      { key: 'raTet', label: 'Retiros TET', num: extra.raTet || 0, den: 1, fmt: 'count' },
-      { key: 'raSng', label: 'Retiros SNG', num: extra.raSng || 0, den: 1, fmt: 'count' },
-      { key: 'raCup', label: 'Retiros CUP', num: extra.raCup || 0, den: 1, fmt: 'count' },
-      { key: 'pacCvc', label: 'Total CVC/CVP', num: extra.pacCvc || 0, den: 1, fmt: 'count' },
-      { key: 'pacTet', label: 'Total TET', num: extra.pacTet || 0, den: 1, fmt: 'count' },
-      { key: 'pacSng', label: 'Total SNG', num: extra.pacSng || 0, den: 1, fmt: 'count' },
-      { key: 'pacCup', label: 'Total CUP', num: extra.pacCup || 0, den: 1, fmt: 'count' },
-      { key: 'sedationTotal', label: 'Sedación total', num: extra.sedationTotal || 0, den: 1, fmt: 'count' },
-      { key: 'sedationEvaluated', label: 'Sedación evaluada', num: extra.sedationEvaluated || 0, den: 1, fmt: 'count' },
-      { key: 'picTotal', label: 'PIC total', num: extra.picTotal || 0, den: 1, fmt: 'count' },
-      { key: 'picRegistered', label: 'PIC registrada', num: extra.picRegistered || 0, den: 1, fmt: 'count' },
-      { key: 'surveyApplied', label: 'Encuestas aplicadas', num: extra.surveyApplied || 0, den: 1, fmt: 'count' },
-      { key: 'surveySatisfied', label: 'Encuestas satisfactorias', num: extra.surveySatisfied || 0, den: 1, fmt: 'count' },
-    ];
+        UCIN_FIELDS.forEach(f => {
+            const col1 = document.createElement('div');
+            col1.className = 'col-md-3';
+            col1.innerHTML =
+                `<label class="form-label">${f.numLabel}</label><input type="number" class="form-control" id="${f.num}" value="0" min="0">`;
 
-    uciFields.forEach(ind => {
-      indicadores[ind.key] = { label: ind.label, numerator: ind.num, denominator: ind.den, result: ind.num, format: 'count' };
-    });
+            const col2 = document.createElement('div');
+            col2.className = 'col-md-3';
+            col2.innerHTML =
+                `<label class="form-label">${f.denLabel}</label><input type="number" class="form-control" id="${f.den}" value="0" min="0">`;
 
-    return indicadores;
-  }
-
-  async function renderUltimoRegistroIndicadores() {
-    const container = document.getElementById('ultimoRegistroIndicadores');
-    const data = await getData();
-    if (data.length === 0) {
-      container.innerHTML = '<p class="text-muted">No hay registros aún.</p>';
-      return;
-    }
-    const ultimo = data.sort((a,b) => b.date.localeCompare(a.date))[0];
-    const indicadores = calcularIndicadores(ultimo);
-    let html = `<div class="table-responsive"><table class="table table-bordered table-sm indicador-tabla">
-      <thead><tr><th>Indicador</th><th>Numerador</th><th>Denominador</th><th>Resultado</th></tr></thead><tbody>`;
-    for (const key in indicadores) {
-      const ind = indicadores[key];
-      let resultado = '—';
-      if (ind.denominator > 0) {
-        if (ind.format === 'percent') resultado = ind.result.toFixed(1) + '%';
-        else if (ind.format === 'rate') resultado = ind.result.toFixed(1);
-        else if (ind.format === 'avg') resultado = ind.result.toFixed(2);
-        else resultado = ind.result;
-      }
-      html += `<tr><td><strong>${ind.label}</strong></td><td>${ind.numerator}</td><td>${ind.denominator}</td><td>${resultado}</td></tr>`;
-    }
-    html += '</tbody></table></div>';
-    container.innerHTML = html;
-  }
-
-  // ================================================================
-  // DASHBOARD COMPLETO (CON TODOS LOS INDICADORES)
-  // ================================================================
-  async function renderDashboard(ward) {
-    const container = document.getElementById('dashboardContent');
-    const data = await getData();
-    if (data.length === 0) {
-      container.innerHTML = `<div class="alert alert-warning">No hay registros para <strong>${ward}</strong>. Comienza a registrar.</div>`;
-      return;
-    }
-
-    // Agrupar por mes
-    const months = {};
-    data.forEach(d => {
-      const key = d.date.substring(0,7);
-      if (!months[key]) months[key] = [];
-      months[key].push(d);
-    });
-    const sortedMonths = Object.keys(months).sort();
-    const labels = sortedMonths.map(m => {
-      const [y, mo] = m.split('-');
-      const names = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Set','Oct','Nov','Dic'];
-      return `${names[parseInt(mo)-1]} ${y}`;
-    });
-
-    function calcMonthlyIndicators(monthData) {
-      const sum = {};
-      monthData.forEach(r => {
-        for (const key in r) {
-          if (typeof r[key] === 'number') {
-            if (!sum[key]) sum[key] = 0;
-            sum[key] += r[key];
-          }
-        }
-        if (r.extra) {
-          for (const key in r.extra) {
-            if (typeof r.extra[key] === 'number') {
-              if (!sum[key]) sum[key] = 0;
-              sum[key] += r.extra[key];
-            }
-          }
-        }
-      });
-      const totalPatients = sum.totalPatients || 0;
-      const ind = {
-        totalPatients: totalPatients,
-        lppEvaluated: sum.lppEvaluated || 0,
-        lppIncidence: sum.lppIncidence || 0,
-        adverseEvents: sum.adverseEvents || 0,
-        falls: sum.falls || 0,
-        cvcDone: sum.cvcDone || 0,
-        cvcTotal: sum.cvcTotal || 0,
-        vmDone: sum.vmDone || 0,
-        vmTotal: sum.vmTotal || 0,
-        cupDone: sum.cupDone || 0,
-        cupTotal: sum.cupTotal || 0,
-        phlebitis: sum.phlebitis || 0,
-        cvpTotal: sum.cvpTotal || 0,
-        paeDay: sum.paeDay || 0,
-        paeNight: sum.paeNight || 0,
-        paeTotal: sum.paeTotal || 0,
-        consciousness: sum.consciousness || 0,
-        hoursNursing: sum.hoursNursing || 0,
-        patientsTurnDay: sum.patientsTurnDay || 0,
-        patientsTurnNight: sum.patientsTurnNight || 0,
-        vmDays: sum.vmDays || 0,
-        vapCases: sum.vapCases || 0,
-        raCvc: sum.raCvc || 0,
-        raTet: sum.raTet || 0,
-        raSng: sum.raSng || 0,
-        raCup: sum.raCup || 0,
-        pacCvc: sum.pacCvc || 0,
-        pacTet: sum.pacTet || 0,
-        pacSng: sum.pacSng || 0,
-        pacCup: sum.pacCup || 0,
-        sedationTotal: sum.sedationTotal || 0,
-        sedationEvaluated: sum.sedationEvaluated || 0,
-        picTotal: sum.picTotal || 0,
-        picRegistered: sum.picRegistered || 0,
-        surveyApplied: sum.surveyApplied || 0,
-        surveySatisfied: sum.surveySatisfied || 0,
-      };
-      // Derivados comunes
-      ind.coberturaLPP = totalPatients > 0 ? (ind.lppEvaluated / totalPatients * 100) : 0;
-      ind.incidenciaLPP = totalPatients > 0 ? (ind.lppIncidence / totalPatients * 100) : 0;
-      ind.tasaEA = totalPatients > 0 ? (ind.adverseEvents / totalPatients * 1000) : 0;
-      ind.tasaCaidas = totalPatients > 0 ? (ind.falls / totalPatients * 1000) : 0;
-      ind.cumplimientoCVC = ind.cvcTotal > 0 ? (ind.cvcDone / ind.cvcTotal * 100) : 0;
-      ind.cumplimientoVM = ind.vmTotal > 0 ? (ind.vmDone / ind.vmTotal * 100) : 0;
-      ind.cumplimientoCUP = ind.cupTotal > 0 ? (ind.cupDone / ind.cupTotal * 100) : 0;
-      ind.incidenciaFlebitis = ind.cvpTotal > 0 ? (ind.phlebitis / ind.cvpTotal * 100) : 0;
-      ind.cumplimientoPAE = ind.paeTotal > 0 ? ((ind.paeDay + ind.paeNight) / ind.paeTotal * 100) : 0;
-      ind.conciencia = totalPatients > 0 ? (ind.consciousness / totalPatients * 100) : 0;
-      ind.paeDayTotal = ind.paeDay;
-      ind.paeNightTotal = ind.paeNight;
-      // Derivados UCI
-      ind.hoursPerPatientDay = totalPatients > 0 ? (ind.hoursNursing / totalPatients) : 0;
-      ind.avgPatientsTurn = (ind.patientsTurnDay + ind.patientsTurnNight) / 2;
-      ind.vmDaysPerPatient = totalPatients > 0 ? (ind.vmDays / totalPatients) : 0;
-      ind.tasaVAP = ind.vmDays > 0 ? (ind.vapCases / ind.vmDays * 1000) : 0;
-      ind.pctRetiroCvc = ind.pacCvc > 0 ? (ind.raCvc / ind.pacCvc * 100) : 0;
-      ind.pctRetiroTet = ind.pacTet > 0 ? (ind.raTet / ind.pacTet * 100) : 0;
-      ind.pctRetiroSng = ind.pacSng > 0 ? (ind.raSng / ind.pacSng * 100) : 0;
-      ind.pctRetiroCup = ind.pacCup > 0 ? (ind.raCup / ind.pacCup * 100) : 0;
-      ind.pctSedation = ind.sedationTotal > 0 ? (ind.sedationEvaluated / ind.sedationTotal * 100) : 0;
-      ind.pctPIC = ind.picTotal > 0 ? (ind.picRegistered / ind.picTotal * 100) : 0;
-      ind.pctSurvey = ind.surveyApplied > 0 ? (ind.surveySatisfied / ind.surveyApplied * 100) : 0;
-      return ind;
-    }
-
-    const monthIndicators = sortedMonths.map(m => calcMonthlyIndicators(months[m]));
-    const last = monthIndicators[monthIndicators.length-1] || {};
-
-    let html = `<h4 class="mb-3"><i class="fas fa-chart-pie me-2"></i> Dashboard - ${ward}</h4>`;
-
-    // KPIs comunes
-    const kpis = [
-      { label: 'Cobertura LPP', value: last.coberturaLPP || 0, unit: '%' },
-      { label: 'Incidencia LPP', value: last.incidenciaLPP || 0, unit: '%' },
-      { label: 'Tasa EA (x1000)', value: last.tasaEA || 0, unit: '' },
-      { label: 'Tasa Caídas (x1000)', value: last.tasaCaidas || 0, unit: '' },
-      { label: 'PAE Día', value: last.paeDayTotal || 0, unit: '' },
-      { label: 'PAE Noche', value: last.paeNightTotal || 0, unit: '' },
-      { label: 'Cumpl. PAE', value: last.cumplimientoPAE || 0, unit: '%' },
-      { label: 'Conciencia', value: last.conciencia || 0, unit: '%' },
-      { label: 'Cumpl. CVC', value: last.cumplimientoCVC || 0, unit: '%' },
-      { label: 'Cumpl. VM', value: last.cumplimientoVM || 0, unit: '%' },
-      { label: 'Cumpl. CUP', value: last.cumplimientoCUP || 0, unit: '%' },
-      { label: 'Flebitis (CVP)', value: last.incidenciaFlebitis || 0, unit: '%' }
-    ];
-    html += `<div class="row g-3 mb-4">`;
-    kpis.forEach(k => {
-      const val = typeof k.value === 'number' ? k.value.toFixed(1) : '0.0';
-      html += `<div class="col-md-3"><div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${val}<span class="kpi-unit">${k.unit}</span></div></div></div>`;
-    });
-    html += `</div>`;
-
-    // KPIs UCI
-    const uciKpis = [
-      { label: 'Horas Enfermería / Paciente-día', value: last.hoursPerPatientDay || 0, unit: 'h' },
-      { label: 'Prom. Pacientes / Turno', value: last.avgPatientsTurn || 0, unit: '' },
-      { label: 'Días VM / Paciente', value: last.vmDaysPerPatient || 0, unit: 'días' },
-      { label: 'Tasa VAP (x1000 días VM)', value: last.tasaVAP || 0, unit: '' },
-      { label: '% Retiro CVC/CVP', value: last.pctRetiroCvc || 0, unit: '%' },
-      { label: '% Retiro TET', value: last.pctRetiroTet || 0, unit: '%' },
-      { label: '% Retiro SNG', value: last.pctRetiroSng || 0, unit: '%' },
-      { label: '% Retiro CUP', value: last.pctRetiroCup || 0, unit: '%' },
-      { label: '% Sedación evaluada', value: last.pctSedation || 0, unit: '%' },
-      { label: '% PIC vigilada', value: last.pctPIC || 0, unit: '%' },
-      { label: '% Satisfacción encuestas', value: last.pctSurvey || 0, unit: '%' },
-    ];
-    html += `<h5 class="mt-4">Indicadores Específicos UCI</h5>
-    <div class="row g-3 mb-4">`;
-    uciKpis.forEach(k => {
-      const val = typeof k.value === 'number' ? k.value.toFixed(1) : '0.0';
-      html += `<div class="col-md-3"><div class="kpi-card" style="border-left-color: #8e44ad;"><div class="kpi-label">${k.label}</div><div class="kpi-value">${val}<span class="kpi-unit">${k.unit}</span></div></div></div>`;
-    });
-    html += `</div>`;
-
-    // GRÁFICO DE BARRAS CON TODOS LOS INDICADORES (comunes + UCI)
-    const chartLabels = [
-      'Cob. LPP', 'Inc. LPP', 'Cumpl. CVC', 'Cumpl. VM', 'Cumpl. CUP', 'Flebitis', 'Cumpl. PAE', 'Conciencia',
-      'H. Enf / Pac', 'Tasa VAP', '% Ret CVC', '% Ret TET', '% Ret SNG', '% Ret CUP', '% Sedación', '% PIC', '% Satisfacción'
-    ];
-    const chartData = [
-      last.coberturaLPP || 0,
-      last.incidenciaLPP || 0,
-      last.cumplimientoCVC || 0,
-      last.cumplimientoVM || 0,
-      last.cumplimientoCUP || 0,
-      last.incidenciaFlebitis || 0,
-      last.cumplimientoPAE || 0,
-      last.conciencia || 0,
-      last.hoursPerPatientDay || 0,
-      last.tasaVAP || 0,
-      last.pctRetiroCvc || 0,
-      last.pctRetiroTet || 0,
-      last.pctRetiroSng || 0,
-      last.pctRetiroCup || 0,
-      last.pctSedation || 0,
-      last.pctPIC || 0,
-      last.pctSurvey || 0
-    ];
-    html += `<div class="row"><div class="col-md-12"><div class="chart-container"><canvas id="chartTodosIndicadores"></canvas></div></div></div>`;
-
-    // TABLA DE DETALLE CON TODOS LOS INDICADORES (numerador/denominador/resultado)
-    html += `<div class="card mt-4">
-      <div class="card-header"><i class="fas fa-table me-2"></i>Detalle de indicadores (último mes)</div>
-      <div class="card-body">
-        <div class="table-responsive"><table class="table table-bordered table-striped indicador-tabla">
-          <thead><tr><th>Indicador</th><th>Numerador</th><th>Denominador</th><th>Resultado</th></tr></thead><tbody>`;
-
-    // Construir la lista de detalle
-    const detalle = [
-      { label: 'Cobertura LPP', num: last.lppEvaluated || 0, den: last.totalPatients || 0, fmt: 'percent' },
-      { label: 'Incidencia LPP', num: last.lppIncidence || 0, den: last.totalPatients || 0, fmt: 'percent' },
-      { label: 'Tasa EA (x1000)', num: last.adverseEvents || 0, den: last.totalPatients || 0, fmt: 'rate' },
-      { label: 'Tasa Caídas (x1000)', num: last.falls || 0, den: last.totalPatients || 0, fmt: 'rate' },
-      { label: 'Cumpl. CVC', num: last.cvcDone || 0, den: last.cvcTotal || 0, fmt: 'percent' },
-      { label: 'Cumpl. VM', num: last.vmDone || 0, den: last.vmTotal || 0, fmt: 'percent' },
-      { label: 'Cumpl. CUP', num: last.cupDone || 0, den: last.cupTotal || 0, fmt: 'percent' },
-      { label: 'Flebitis (CVP)', num: last.phlebitis || 0, den: last.cvpTotal || 0, fmt: 'percent' },
-      { label: 'Cumpl. PAE', num: (last.paeDayTotal || 0) + (last.paeNightTotal || 0), den: last.paeTotal || 0, fmt: 'percent' },
-      { label: 'Conciencia', num: last.consciousness || 0, den: last.totalPatients || 0, fmt: 'percent' },
-      { label: 'Horas Enfermería / Pac-día', num: last.hoursNursing || 0, den: last.totalPatients || 0, fmt: 'avg' },
-      { label: 'Tasa VAP (x1000 días VM)', num: last.vapCases || 0, den: last.vmDays || 0, fmt: 'rate' },
-      { label: '% Retiro CVC/CVP', num: last.raCvc || 0, den: last.pacCvc || 0, fmt: 'percent' },
-      { label: '% Retiro TET', num: last.raTet || 0, den: last.pacTet || 0, fmt: 'percent' },
-      { label: '% Retiro SNG', num: last.raSng || 0, den: last.pacSng || 0, fmt: 'percent' },
-      { label: '% Retiro CUP', num: last.raCup || 0, den: last.pacCup || 0, fmt: 'percent' },
-      { label: '% Sedación evaluada', num: last.sedationEvaluated || 0, den: last.sedationTotal || 0, fmt: 'percent' },
-      { label: '% PIC vigilada', num: last.picRegistered || 0, den: last.picTotal || 0, fmt: 'percent' },
-      { label: '% Satisfacción encuestas', num: last.surveySatisfied || 0, den: last.surveyApplied || 0, fmt: 'percent' },
-    ];
-
-    detalle.forEach(ind => {
-      let resultado = '—';
-      if (ind.den > 0) {
-        let val = 0;
-        if (ind.fmt === 'percent') val = (ind.num / ind.den) * 100;
-        else if (ind.fmt === 'rate') val = (ind.num / ind.den) * 1000;
-        else if (ind.fmt === 'avg') val = ind.num / ind.den;
-        else val = ind.num / ind.den;
-        if (ind.fmt === 'percent') resultado = val.toFixed(1) + '%';
-        else if (ind.fmt === 'rate') resultado = val.toFixed(1);
-        else if (ind.fmt === 'avg') resultado = val.toFixed(2) + ' h';
-        else resultado = val.toFixed(1);
-      }
-      html += `<tr><td><strong>${ind.label}</strong></td><td>${ind.num}</td><td>${ind.den}</td><td>${resultado}</td></tr>`;
-    });
-    html += `</tbody></table></div></div></div>`;
-
-    container.innerHTML = html;
-
-    // Graficar
-    setTimeout(() => {
-      const ctx = document.getElementById('chartTodosIndicadores');
-      if (ctx) {
-        if (window.chartTodos) window.chartTodos.destroy();
-        window.chartTodos = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: chartLabels,
-            datasets: [{
-              label: 'Último mes',
-              data: chartData,
-              backgroundColor: ['#0a3d62','#e74c3c','#8e44ad','#1abc9c','#3498db','#e84393','#28a745','#f39c12','#6f42c1','#fd7e14','#20c997','#e83e8c','#0d6efd','#6610f2','#d63384','#dc3545','#198754']
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y.toFixed(1) + '%' } } },
-            scales: { y: { beginAtZero: true, title: { display: true, text: '%' } } }
-          }
+            container.appendChild(col1);
+            container.appendChild(col2);
         });
-      }
-    }, 300);
-  }
-
-  // ================================================================
-  // REPORTE TRIMESTRAL COMPLETO
-  // ================================================================
-  async function renderReport(ward) {
-    const container = document.getElementById('reportContent');
-    const data = await getData();
-    if (data.length === 0) {
-      container.innerHTML = `<div class="alert alert-warning">No hay datos para <strong>${ward}</strong>.</div>`;
-      return;
     }
 
-    function getQuarter(m) {
-      const mo = parseInt(m.split('-')[1]);
-      if (mo <= 3) return 'Trim I';
-      if (mo <= 6) return 'Trim II';
-      if (mo <= 9) return 'Trim III';
-      return 'Trim IV';
+    function updateTotal() {
+        const start = parseInt(document.getElementById('startPatients').value) || 0;
+        const adm = parseInt(document.getElementById('admissions').value) || 0;
+        const dis = parseInt(document.getElementById('discharges').value) || 0;
+        document.getElementById('totalPatients').value = Math.max(0, start + adm - dis);
     }
 
-    const quarters = {};
-    data.forEach(d => {
-      const key = d.date.substring(0,7);
-      const q = getQuarter(key);
-      if (!quarters[q]) quarters[q] = [];
-      quarters[q].push(d);
-    });
+    // ================================================================
+    // GESTIÓN DE DATOS (Supabase)
+    // ================================================================
+    async function getData() {
+        const { data, error } = await supabaseClient
+            .from("REGISTROS")
+            .select("*")
+            .eq("ward", FIXED_WARD)
+            .order("date", { ascending: true });
+        if (error) { console.error(error); return []; }
+        return data.map(row => row.data);
+    }
 
-    const sortedQuarters = ['Trim I', 'Trim II', 'Trim III', 'Trim IV'];
-    const quarterData = {};
-    sortedQuarters.forEach(q => {
-      const records = quarters[q] || [];
-      if (records.length === 0) { quarterData[q] = null; return; }
-      const sum = {};
-      records.forEach(r => {
-        for (const key in r) {
-          if (typeof r[key] === 'number') {
-            if (!sum[key]) sum[key] = 0;
-            sum[key] += r[key];
-          }
+    async function saveData(record) {
+        const { data: existing, error: checkError } = await supabaseClient
+            .from("REGISTROS")
+            .select("id")
+            .eq("date", record.date)
+            .eq("ward", FIXED_WARD)
+            .maybeSingle();
+        if (checkError) { console.error(checkError); alert("Error de verificación"); return false; }
+        if (existing) {
+            const { error } = await supabaseClient
+                .from("REGISTROS")
+                .update({ data: record })
+                .eq("id", existing.id);
+            if (error) { console.error(error); alert("Error al actualizar"); return false; }
+        } else {
+            const { error } = await supabaseClient
+                .from("REGISTROS")
+                .insert({ date: record.date, ward: FIXED_WARD, data: record });
+            if (error) { console.error(error); alert("Error al insertar"); return false; }
         }
-        if (r.extra) {
-          for (const key in r.extra) {
-            if (typeof r.extra[key] === 'number') {
-              if (!sum[key]) sum[key] = 0;
-              sum[key] += r.extra[key];
+        return true;
+    }
+
+    // ================================================================
+    // SEMÁFORO (SIN FILTRO DE MÍNIMO DE DENOMINADOR)
+    // ================================================================
+    function obtenerSemaforo(nombre, valor, denominador) {
+        if (denominador === 0) {
+            return { color: 'status-neutral', texto: 'N/A' };
+        }
+
+        const umbrales = {
+            'Cobertura LPP': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Incidencia LPP': { verde: 5, amarillo: 12, rojo: 20, invertido: true },
+            'Tasa EA (x1000)': { verde: 30, amarillo: 60, rojo: 120, invertido: true },
+            'Tasa Caídas (x1000)': { verde: 20, amarillo: 50, rojo: 100, invertido: true },
+            'Cumpl. CVC': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Cumpl. VM': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Cumpl. CUP': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Flebitis (CVP)': { verde: 5, amarillo: 10, rojo: 20, invertido: true },
+            'Cumpl. PAE': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Cumpl. Glasgow': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Horas Enfermería (24h)': { verde: 12, amarillo: 8, rojo: 5, invertido: false },
+            'Ratio día': { verde: 2, amarillo: 3, rojo: 4, invertido: false },
+            'Ratio noche': { verde: 2.5, amarillo: 3.5, rojo: 5, invertido: false },
+            'Tasa VAP (x1000)': { verde: 10, amarillo: 20, rojo: 40, invertido: true },
+            'Sedación evaluada': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'PIC vigilada': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Retiro CVC/CVP': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Retiro TET': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Retiro SNG/SOG': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Retiro CUP': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Encuestas satisfactorias': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+        };
+
+        const u = umbrales[nombre] || { verde: 90, amarillo: 70, rojo: 50, invertido: false };
+        let color, texto;
+
+        if (u.invertido) {
+            if (valor <= u.verde) { color = 'status-green';
+                texto = 'Cumplido'; } else if (valor <= u.amarillo) { color = 'status-yellow';
+                texto = 'En observación'; } else if (valor <= u.rojo) { color = 'status-yellow';
+                texto = 'En observación'; } else { color = 'status-red';
+                texto = 'Revisar'; }
+        } else {
+            if (valor >= u.verde) { color = 'status-green';
+                texto = 'Cumplido'; } else if (valor >= u.amarillo) { color = 'status-yellow';
+                texto = 'En observación'; } else if (valor >= u.rojo) { color = 'status-yellow';
+                texto = 'En observación'; } else { color = 'status-red';
+                texto = 'Revisar'; }
+        }
+
+        return { color, texto };
+    }
+
+    // ================================================================
+    // RENDERIZAR INDICADORES DEL ÚLTIMO REGISTRO
+    // ================================================================
+    function calcularIndicadores(record) {
+        const indicadores = {};
+        const totalPatients = record.totalPatients || 0;
+        const extra = record.extra || {};
+
+        const comunes = [
+            { key: 'coberturaLPP', label: 'Cobertura LPP', num: record.lppEvaluated || 0, den: record.admissions ||
+                    0, fmt: 'percent' },
+            { key: 'incidenciaLPP', label: 'Incidencia LPP', num: record.lppIncidence || 0, den: totalPatients,
+                fmt: 'percent' },
+            { key: 'tasaEA', label: 'Tasa EA (x1000)', num: record.adverseEvents || 0, den: totalPatients,
+                fmt: 'rate' },
+            { key: 'tasaCaidas', label: 'Tasa Caídas (x1000)', num: record.falls || 0, den: totalPatients,
+                fmt: 'rate' },
+            { key: 'cumplimientoCVC', label: 'Cumpl. CVC', num: record.cvcDone || 0, den: record.cvcTotal || 0,
+                fmt: 'percent' },
+            { key: 'cumplimientoVM', label: 'Cumpl. VM', num: record.vmDone || 0, den: record.vmTotal || 0,
+                fmt: 'percent' },
+            { key: 'cumplimientoCUP', label: 'Cumpl. CUP', num: record.cupDone || 0, den: record.cupTotal || 0,
+                fmt: 'percent' },
+            { key: 'incidenciaFlebitis', label: 'Flebitis (CVP)', num: record.phlebitis || 0, den: record
+                    .cvpTotal || 0, fmt: 'percent' },
+            { key: 'cumplimientoPAE', label: 'Cumpl. PAE', num: (record.paeDay || 0) + (record.paeNight || 0),
+                den: record.paeTotal || 0, fmt: 'percent' },
+            { key: 'cumplimientoGlasgow', label: 'Cumpl. Glasgow', num: (record.consciousnessDay || 0) + (record
+                    .consciousnessNight || 0), den: record.consciousnessExpected || 0, fmt: 'percent' },
+        ];
+
+        comunes.forEach(ind => {
+            let result = 0;
+            if (ind.den > 0) {
+                if (ind.fmt === 'percent') result = (ind.num / ind.den) * 100;
+                else if (ind.fmt === 'rate') result = (ind.num / ind.den) * 1000;
+                else result = ind.num / ind.den;
             }
-          }
+            indicadores[ind.key] = { label: ind.label, numerator: ind.num, denominator: ind.den, result,
+                format: ind.fmt };
+        });
+
+        const ucinList = [
+            { key: 'hoursNursing', label: 'Horas de Enfermería (24h)', num: extra.hoursNursing || 0,
+                den: extra.hoursNursingDen || 0, fmt: 'avg' },
+            { key: 'ratioDay', label: 'Ratio día', num: extra.patientsTurnDay || 0, den: extra.nursesDay || 0,
+                fmt: 'avg' },
+            { key: 'ratioNight', label: 'Ratio noche', num: extra.patientsTurnNight || 0,
+                den: extra.nursesNight || 0, fmt: 'avg' },
+            { key: 'vapRate', label: 'Tasa VAP (x1000)', num: extra.vapCases || 0, den: extra.vmDays || 0,
+                fmt: 'rate' },
+            { key: 'sedationEval', label: 'Sedación evaluada', num: extra.sedationEvaluated || 0,
+                den: extra.sedationTotal || 0, fmt: 'percent' },
+            { key: 'picReg', label: 'PIC vigilada', num: extra.picRegistered || 0, den: extra.picTotal || 0,
+                fmt: 'percent' },
+            { key: 'retiroCvc', label: 'Retiro CVC/CVP', num: extra.raCvc || 0, den: extra.pacCvc || 0,
+                fmt: 'percent' },
+            { key: 'retiroTet', label: 'Retiro TET', num: extra.raTet || 0, den: extra.pacTet || 0,
+                fmt: 'percent' },
+            { key: 'retiroSng', label: 'Retiro SNG/SOG', num: extra.raSng || 0, den: extra.pacSng || 0,
+                fmt: 'percent' },
+            { key: 'retiroCup', label: 'Retiro CUP', num: extra.raCup || 0, den: extra.pacCup || 0,
+                fmt: 'percent' },
+            { key: 'surveySat', label: 'Encuestas satisfactorias', num: extra.surveySatisfied || 0,
+                den: extra.surveyApplied || 0, fmt: 'percent' },
+        ];
+
+        ucinList.forEach(ind => {
+            let result = 0;
+            if (ind.den > 0) {
+                if (ind.fmt === 'percent') result = (ind.num / ind.den) * 100;
+                else if (ind.fmt === 'rate') result = (ind.num / ind.den) * 1000;
+                else if (ind.fmt === 'avg') result = ind.num / ind.den;
+                else result = ind.num / ind.den;
+            }
+            indicadores[ind.key] = { label: ind.label, numerator: ind.num, denominator: ind.den, result,
+                format: ind.fmt };
+        });
+
+        return indicadores;
+    }
+
+    async function renderUltimoRegistroIndicadores() {
+        const container = document.getElementById('ultimoRegistroIndicadores');
+        const data = await getData();
+        if (data.length === 0) {
+            container.innerHTML = '<p class="text-muted">No hay registros aún.</p>';
+            return;
         }
-      });
-      const totalPatients = sum.totalPatients || 0;
-      const ind = {
-        totalPatients: totalPatients,
-        coberturaLPP: totalPatients > 0 ? (sum.lppEvaluated || 0) / totalPatients * 100 : 0,
-        incidenciaLPP: totalPatients > 0 ? (sum.lppIncidence || 0) / totalPatients * 100 : 0,
-        tasaEA: totalPatients > 0 ? (sum.adverseEvents || 0) / totalPatients * 1000 : 0,
-        tasaCaidas: totalPatients > 0 ? (sum.falls || 0) / totalPatients * 1000 : 0,
-        cumplimientoCVC: (sum.cvcTotal || 0) > 0 ? (sum.cvcDone || 0) / (sum.cvcTotal || 0) * 100 : 0,
-        cumplimientoVM: (sum.vmTotal || 0) > 0 ? (sum.vmDone || 0) / (sum.vmTotal || 0) * 100 : 0,
-        cumplimientoCUP: (sum.cupTotal || 0) > 0 ? (sum.cupDone || 0) / (sum.cupTotal || 0) * 100 : 0,
-        incidenciaFlebitis: (sum.cvpTotal || 0) > 0 ? (sum.phlebitis || 0) / (sum.cvpTotal || 0) * 100 : 0,
-        cumplimientoPAE: (sum.paeTotal || 0) > 0 ? ((sum.paeDay || 0) + (sum.paeNight || 0)) / (sum.paeTotal || 0) * 100 : 0,
-        conciencia: totalPatients > 0 ? (sum.consciousness || 0) / totalPatients * 100 : 0,
-        paeDayTotal: sum.paeDay || 0,
-        paeNightTotal: sum.paeNight || 0,
-        hoursNursing: sum.hoursNursing || 0,
-        patientsTurnDay: sum.patientsTurnDay || 0,
-        patientsTurnNight: sum.patientsTurnNight || 0,
-        vmDays: sum.vmDays || 0,
-        vapCases: sum.vapCases || 0,
-        raCvc: sum.raCvc || 0,
-        raTet: sum.raTet || 0,
-        raSng: sum.raSng || 0,
-        raCup: sum.raCup || 0,
-        pacCvc: sum.pacCvc || 0,
-        pacTet: sum.pacTet || 0,
-        pacSng: sum.pacSng || 0,
-        pacCup: sum.pacCup || 0,
-        sedationTotal: sum.sedationTotal || 0,
-        sedationEvaluated: sum.sedationEvaluated || 0,
-        picTotal: sum.picTotal || 0,
-        picRegistered: sum.picRegistered || 0,
-        surveyApplied: sum.surveyApplied || 0,
-        surveySatisfied: sum.surveySatisfied || 0,
-      };
-      // Derivados
-      ind.hoursPerPatientDay = totalPatients > 0 ? (ind.hoursNursing / totalPatients) : 0;
-      ind.avgPatientsTurn = (ind.patientsTurnDay + ind.patientsTurnNight) / 2;
-      ind.vmDaysPerPatient = totalPatients > 0 ? (ind.vmDays / totalPatients) : 0;
-      ind.tasaVAP = ind.vmDays > 0 ? (ind.vapCases / ind.vmDays * 1000) : 0;
-      ind.pctRetiroCvc = ind.pacCvc > 0 ? (ind.raCvc / ind.pacCvc * 100) : 0;
-      ind.pctRetiroTet = ind.pacTet > 0 ? (ind.raTet / ind.pacTet * 100) : 0;
-      ind.pctRetiroSng = ind.pacSng > 0 ? (ind.raSng / ind.pacSng * 100) : 0;
-      ind.pctRetiroCup = ind.pacCup > 0 ? (ind.raCup / ind.pacCup * 100) : 0;
-      ind.pctSedation = ind.sedationTotal > 0 ? (ind.sedationEvaluated / ind.sedationTotal * 100) : 0;
-      ind.pctPIC = ind.picTotal > 0 ? (ind.picRegistered / ind.picTotal * 100) : 0;
-      ind.pctSurvey = ind.surveyApplied > 0 ? (ind.surveySatisfied / ind.surveyApplied * 100) : 0;
-      quarterData[q] = ind;
-    });
+        const ultimo = data.sort((a, b) => b.date.localeCompare(a.date))[0];
+        const indicadores = calcularIndicadores(ultimo);
 
-    let html = `<h4>Reporte Trimestral - ${ward}</h4>
-    <div class="table-responsive"><table class="table table-bordered table-striped table-indicators" id="quarterTable">
-      <thead><tr><th>Indicador</th>${sortedQuarters.map(q => `<th>${q}</th>`).join('')}</tr></thead><tbody>`;
-    const rows = [
-      { label: 'Pacientes-día', key: 'totalPatients', fmt: v => v },
-      { label: 'Cobertura LPP', key: 'coberturaLPP', fmt: v => (v).toFixed(1)+'%' },
-      { label: 'Incidencia LPP', key: 'incidenciaLPP', fmt: v => (v).toFixed(1)+'%' },
-      { label: 'Tasa EA (x1000)', key: 'tasaEA', fmt: v => (v).toFixed(1) },
-      { label: 'Tasa Caídas (x1000)', key: 'tasaCaidas', fmt: v => (v).toFixed(1) },
-      { label: 'Cumpl. CVC', key: 'cumplimientoCVC', fmt: v => (v).toFixed(1)+'%' },
-      { label: 'Cumpl. VM', key: 'cumplimientoVM', fmt: v => (v).toFixed(1)+'%' },
-      { label: 'Cumpl. CUP', key: 'cumplimientoCUP', fmt: v => (v).toFixed(1)+'%' },
-      { label: 'Flebitis (CVP)', key: 'incidenciaFlebitis', fmt: v => (v).toFixed(1)+'%' },
-      { label: 'Cumpl. PAE (D+N)', key: 'cumplimientoPAE', fmt: v => (v).toFixed(1)+'%' },
-      { label: 'PAE Día', key: 'paeDayTotal', fmt: v => v },
-      { label: 'PAE Noche', key: 'paeNightTotal', fmt: v => v },
-      { label: 'Conciencia', key: 'conciencia', fmt: v => (v).toFixed(1)+'%' },
-      { label: 'Horas Enf. / Pac-día', key: 'hoursPerPatientDay', fmt: v => (v).toFixed(2)+' h' },
-      { label: 'Prom. Pacientes / Turno', key: 'avgPatientsTurn', fmt: v => (v).toFixed(1) },
-      { label: 'Días VM / Paciente', key: 'vmDaysPerPatient', fmt: v => (v).toFixed(1) },
-      { label: 'Tasa VAP (x1000 días VM)', key: 'tasaVAP', fmt: v => (v).toFixed(1) },
-      { label: '% Retiro CVC/CVP', key: 'pctRetiroCvc', fmt: v => (v).toFixed(1)+'%' },
-      { label: '% Retiro TET', key: 'pctRetiroTet', fmt: v => (v).toFixed(1)+'%' },
-      { label: '% Retiro SNG', key: 'pctRetiroSng', fmt: v => (v).toFixed(1)+'%' },
-      { label: '% Retiro CUP', key: 'pctRetiroCup', fmt: v => (v).toFixed(1)+'%' },
-      { label: '% Sedación evaluada', key: 'pctSedation', fmt: v => (v).toFixed(1)+'%' },
-      { label: '% PIC vigilada', key: 'pctPIC', fmt: v => (v).toFixed(1)+'%' },
-      { label: '% Satisfacción encuestas', key: 'pctSurvey', fmt: v => (v).toFixed(1)+'%' }
-    ];
-    rows.forEach(row => {
-      html += `<tr><td><strong>${row.label}</strong></td>`;
-      sortedQuarters.forEach(q => {
-        const qData = quarterData[q];
-        let val = qData ? (qData[row.key] !== undefined ? qData[row.key] : 0) : 0;
-        html += `<td>${row.fmt(val)}</td>`;
-      });
-      html += `</tr>`;
-    });
-    html += `</tbody></table>
-    <button class="btn btn-outline-primary mt-3" onclick="copyTable()"><i class="fas fa-copy me-2"></i> Copiar Tabla</button></div>`;
-    container.innerHTML = html;
-  }
+        const ordenComunes = ['coberturaLPP', 'incidenciaLPP', 'tasaEA', 'tasaCaidas', 'cumplimientoCVC',
+            'cumplimientoVM', 'cumplimientoCUP', 'incidenciaFlebitis', 'cumplimientoPAE', 'cumplimientoGlasgow'
+        ];
+        const ordenUcin = ['hoursNursing', 'ratioDay', 'ratioNight', 'vapRate', 'sedationEval', 'picReg',
+            'retiroCvc', 'retiroTet', 'retiroSng', 'retiroCup', 'surveySat'
+        ];
+        const keys = [...ordenComunes, ...ordenUcin];
 
-  function copyTable() {
-    const table = document.getElementById('quarterTable');
-    if (!table) return;
-    const range = document.createRange();
-    range.selectNode(table);
-    window.getSelection().removeAllRanges();
-    window.getSelection().addRange(range);
-    document.execCommand('copy');
-    alert('Tabla copiada al portapapeles.');
-  }
+        let html =
+            `<div class="table-responsive"><table class="table table-bordered table-sm indicador-tabla">
+          <thead><tr><th>Indicador</th><th>Numerador</th><th>Denominador</th><th>Resultado</th><th>Estado</th></tr></thead><tbody>`;
+        for (const key of keys) {
+            const ind = indicadores[key];
+            if (!ind) continue;
+            let resultado = '—';
+            if (ind.denominator === 0) {
+                resultado = '—';
+            } else if (ind.format === 'absolute') {
+                resultado = ind.result.toString();
+            } else if (ind.format === 'percent') {
+                resultado = ind.result.toFixed(1) + '%';
+            } else if (ind.format === 'rate') {
+                resultado = ind.result.toFixed(1);
+            } else if (ind.format === 'avg') {
+                resultado = ind.result.toFixed(1);
+            } else {
+                resultado = ind.result.toFixed(1);
+            }
 
-  // ================================================================
-  // RENDERIZAR ÚLTIMOS REGISTROS
-  // ================================================================
-  async function renderLastEntries() {
-    const container = document.getElementById('lastEntries');
-    const data = await getData();
-    if (data.length === 0) {
-      container.innerHTML = '<p class="text-muted">No hay registros.</p>';
-      return;
+            const sem = obtenerSemaforo(ind.label, ind.result, ind.denominator);
+            html += `<tr class="${sem.color}">
+              <td><strong>${ind.label}</strong></td>
+              <td>${ind.numerator}</td>
+              <td>${ind.denominator}</td>
+              <td>${resultado}</td>
+              <td>${sem.texto}</td>
+            </tr>`;
+        }
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
     }
-    let html = `<div class="table-responsive"><table class="table table-sm table-bordered">
-      <thead><tr><th>Fecha</th><th>Inicio</th><th>Ingresos</th><th>Egresos</th><th>Total</th><th>LPP Eval</th><th>Caídas</th><th>PAE Día</th><th>PAE Noche</th><th>Acción</th></tr></thead><tbody>`;
-    data.slice(0, 15).forEach(r => {
-      html += `<tr>
-        <td>${r.date}</td>
-        <td>${r.startPatients||0}</td>
-        <td>${r.admissions||0}</td>
-        <td>${r.discharges||0}</td>
-        <td>${r.totalPatients}</td>
-        <td>${r.lppEvaluated}</td>
-        <td>${r.falls}</td>
-        <td>${r.paeDay||0}</td>
-        <td>${r.paeNight||0}</td>
-        <td><button class="btn-delete-record" onclick="deleteRecord('${r.date}','${r.ward}')"><i class="fas fa-trash-alt"></i></button></td>
-      </tr>`;
-    });
-    html += '</tbody></table></div>';
-    container.innerHTML = html;
-  }
 
-  async function deleteRecord(date, ward) {
-    if (!confirm(`¿Eliminar el registro del día ${date}?`)) return;
-    const { error } = await supabaseClient
-      .from('REGISTROS')
-      .delete()
-      .eq('date', date)
-      .eq('ward', ward);
-    if (error) {
-      alert("Error al eliminar.");
-      return;
+    // ================================================================
+    // DASHBOARD
+    // ================================================================
+    async function renderDashboard(ward) {
+        const container = document.getElementById('dashboardContent');
+        const data = await getData();
+        if (data.length === 0) {
+            container.innerHTML =
+                `<div class="alert alert-warning">No hay registros para <strong>${ward}</strong>. Comienza a registrar.</div>`;
+            return;
+        }
+
+        const months = {};
+        data.forEach(d => {
+            const key = d.date.substring(0, 7);
+            if (!months[key]) months[key] = [];
+            months[key].push(d);
+        });
+        const sortedMonths = Object.keys(months).sort();
+        const names = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
+
+        function calcMonthlyIndicators(monthData) {
+            const sum = {};
+            monthData.forEach(r => {
+                for (const key in r) {
+                    if (typeof r[key] === 'number') {
+                        if (!sum[key]) sum[key] = 0;
+                        sum[key] += r[key];
+                    }
+                }
+                if (r.extra) {
+                    for (const key in r.extra) {
+                        if (typeof r.extra[key] === 'number') {
+                            if (!sum[key]) sum[key] = 0;
+                            sum[key] += r.extra[key];
+                        }
+                    }
+                }
+            });
+            const totalPatients = sum.totalPatients || 0;
+            const admissions = sum.admissions || 0;
+            const ind = {
+                totalPatients,
+                admissions,
+                lppEvaluated: sum.lppEvaluated || 0,
+                lppIncidence: sum.lppIncidence || 0,
+                adverseEvents: sum.adverseEvents || 0,
+                falls: sum.falls || 0,
+                cvcDone: sum.cvcDone || 0,
+                cvcTotal: sum.cvcTotal || 0,
+                vmDone: sum.vmDone || 0,
+                vmTotal: sum.vmTotal || 0,
+                cupDone: sum.cupDone || 0,
+                cupTotal: sum.cupTotal || 0,
+                phlebitis: sum.phlebitis || 0,
+                cvpTotal: sum.cvpTotal || 0,
+                paeDay: sum.paeDay || 0,
+                paeNight: sum.paeNight || 0,
+                paeTotal: sum.paeTotal || 0,
+                consciousnessDay: sum.consciousnessDay || 0,
+                consciousnessNight: sum.consciousnessNight || 0,
+                consciousnessExpected: sum.consciousnessExpected || 0,
+                hoursNursing: sum.hoursNursing || 0,
+                hoursNursingDen: sum.hoursNursingDen || 0,
+                patientsTurnDay: sum.patientsTurnDay || 0,
+                nursesDay: sum.nursesDay || 0,
+                patientsTurnNight: sum.patientsTurnNight || 0,
+                nursesNight: sum.nursesNight || 0,
+                vapCases: sum.vapCases || 0,
+                vmDays: sum.vmDays || 0,
+                sedationEvaluated: sum.sedationEvaluated || 0,
+                sedationTotal: sum.sedationTotal || 0,
+                picRegistered: sum.picRegistered || 0,
+                picTotal: sum.picTotal || 0,
+                raCvc: sum.raCvc || 0,
+                pacCvc: sum.pacCvc || 0,
+                raTet: sum.raTet || 0,
+                pacTet: sum.pacTet || 0,
+                raSng: sum.raSng || 0,
+                pacSng: sum.pacSng || 0,
+                raCup: sum.raCup || 0,
+                pacCup: sum.pacCup || 0,
+                surveySatisfied: sum.surveySatisfied || 0,
+                surveyApplied: sum.surveyApplied || 0,
+            };
+            // Comunes
+            ind.coberturaLPP = admissions > 0 ? (ind.lppEvaluated / admissions * 100) : 0;
+            ind.incidenciaLPP = totalPatients > 0 ? (ind.lppIncidence / totalPatients * 100) : 0;
+            ind.tasaEA = totalPatients > 0 ? (ind.adverseEvents / totalPatients * 1000) : 0;
+            ind.tasaCaidas = totalPatients > 0 ? (ind.falls / totalPatients * 1000) : 0;
+            ind.cumplimientoCVC = ind.cvcTotal > 0 ? (ind.cvcDone / ind.cvcTotal * 100) : 0;
+            ind.cumplimientoVM = ind.vmTotal > 0 ? (ind.vmDone / ind.vmTotal * 100) : 0;
+            ind.cumplimientoCUP = ind.cupTotal > 0 ? (ind.cupDone / ind.cupTotal * 100) : 0;
+            ind.incidenciaFlebitis = ind.cvpTotal > 0 ? (ind.phlebitis / ind.cvpTotal * 100) : 0;
+            ind.cumplimientoPAE = ind.paeTotal > 0 ? ((ind.paeDay + ind.paeNight) / ind.paeTotal * 100) : 0;
+            ind.cumplimientoGlasgow = ind.consciousnessExpected > 0 ? ((ind.consciousnessDay + ind
+                .consciousnessNight) / ind.consciousnessExpected * 100) : 0;
+            // UCI/UCIN
+            ind.horasEnfermeria = ind.hoursNursingDen > 0 ? (ind.hoursNursing / ind.hoursNursingDen) : 0;
+            ind.ratioDay = ind.nursesDay > 0 ? (ind.patientsTurnDay / ind.nursesDay) : 0;
+            ind.ratioNight = ind.nursesNight > 0 ? (ind.patientsTurnNight / ind.nursesNight) : 0;
+            ind.tasaVAP = ind.vmDays > 0 ? (ind.vapCases / ind.vmDays * 1000) : 0;
+            ind.pctSedation = ind.sedationTotal > 0 ? (ind.sedationEvaluated / ind.sedationTotal * 100) : 0;
+            ind.pctPIC = ind.picTotal > 0 ? (ind.picRegistered / ind.picTotal * 100) : 0;
+            ind.pctRetiroCvc = ind.pacCvc > 0 ? (ind.raCvc / ind.pacCvc * 100) : 0;
+            ind.pctRetiroTet = ind.pacTet > 0 ? (ind.raTet / ind.pacTet * 100) : 0;
+            ind.pctRetiroSng = ind.pacSng > 0 ? (ind.raSng / ind.pacSng * 100) : 0;
+            ind.pctRetiroCup = ind.pacCup > 0 ? (ind.raCup / ind.pacCup * 100) : 0;
+            ind.pctSurvey = ind.surveyApplied > 0 ? (ind.surveySatisfied / ind.surveyApplied * 100) : 0;
+            return ind;
+        }
+
+        const monthIndicators = sortedMonths.map(m => calcMonthlyIndicators(months[m]));
+        const last = monthIndicators[monthIndicators.length - 1] || {};
+
+        let html =
+            `<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+          <h4 class="mb-2"><i class="fas fa-chart-pie me-2"></i> Dashboard - ${ward}</h4>
+        </div>`;
+
+        const kpisComunes = [
+            { label: 'Cobertura LPP', value: last.coberturaLPP || 0, unit: '%', den: last.admissions },
+            { label: 'Incidencia LPP', value: last.incidenciaLPP || 0, unit: '%', den: last.totalPatients },
+            { label: 'Tasa EA (x1000)', value: last.tasaEA || 0, unit: '', den: last.totalPatients },
+            { label: 'Tasa Caídas (x1000)', value: last.tasaCaidas || 0, unit: '', den: last.totalPatients },
+            { label: 'Cumpl. CVC', value: last.cumplimientoCVC || 0, unit: '%', den: last.cvcTotal },
+            { label: 'Cumpl. VM', value: last.cumplimientoVM || 0, unit: '%', den: last.vmTotal },
+            { label: 'Cumpl. CUP', value: last.cumplimientoCUP || 0, unit: '%', den: last.cupTotal },
+            { label: 'Flebitis (CVP)', value: last.incidenciaFlebitis || 0, unit: '%', den: last.cvpTotal },
+            { label: 'Cumpl. PAE', value: last.cumplimientoPAE || 0, unit: '%', den: last.paeTotal },
+            { label: 'Cumpl. Glasgow', value: last.cumplimientoGlasgow || 0, unit: '%',
+            den: last.consciousnessExpected },
+        ];
+
+        html += `<div class="row g-3 mb-4">`;
+        kpisComunes.forEach(k => {
+            const val = typeof k.value === 'number' ? k.value.toFixed(1) : '0.0';
+            const sem = obtenerSemaforo(k.label, k.value, k.den || 0);
+            html += `<div class="col-md-3"><div class="kpi-card" style="border-left-color: ${sem.color === 'status-green' ? '#28a745' : sem.color === 'status-yellow' ? '#ffc107' : sem.color === 'status-red' ? '#dc3545' : '#6c757d'};">
+              <div class="kpi-label">${k.label}</div>
+              <div class="kpi-value">${val}<span class="kpi-unit">${k.unit}</span></div>
+              <small class="${sem.color} sem-foro-texto">${sem.texto}</small>
+            </div></div>`;
+        });
+        html += `</div>`;
+
+        const kpisUcin = [
+            { label: 'Horas Enfermería (24h)', value: last.horasEnfermeria || 0, unit: 'h/pac',
+            den: last.hoursNursingDen },
+            { label: 'Ratio día', value: last.ratioDay || 0, unit: 'pac/enf', den: last.nursesDay },
+            { label: 'Ratio noche', value: last.ratioNight || 0, unit: 'pac/enf', den: last.nursesNight },
+            { label: 'Tasa VAP (x1000)', value: last.tasaVAP || 0, unit: '', den: last.vmDays },
+            { label: 'Sedación evaluada', value: last.pctSedation || 0, unit: '%', den: last.sedationTotal },
+            { label: 'PIC vigilada', value: last.pctPIC || 0, unit: '%', den: last.picTotal },
+            { label: 'Retiro CVC/CVP', value: last.pctRetiroCvc || 0, unit: '%', den: last.pacCvc },
+            { label: 'Retiro TET', value: last.pctRetiroTet || 0, unit: '%', den: last.pacTet },
+            { label: 'Retiro SNG/SOG', value: last.pctRetiroSng || 0, unit: '%', den: last.pacSng },
+            { label: 'Retiro CUP', value: last.pctRetiroCup || 0, unit: '%', den: last.pacCup },
+            { label: 'Encuestas satisfactorias', value: last.pctSurvey || 0, unit: '%', den: last
+                .surveyApplied },
+        ];
+
+        html += `<h5 class="section-title mt-3"><i class="fas fa-plus-circle me-2"></i>Indicadores Específicos UCI</h5>
+            <div class="row g-3 mb-4">`;
+        kpisUcin.forEach(k => {
+            const val = typeof k.value === 'number' ? k.value.toFixed(1) : '0.0';
+            const sem = obtenerSemaforo(k.label, k.value, k.den || 0);
+            html += `<div class="col-md-3"><div class="kpi-card" style="border-left-color: ${sem.color === 'status-green' ? '#28a745' : sem.color === 'status-yellow' ? '#ffc107' : sem.color === 'status-red' ? '#dc3545' : '#6c757d'};">
+              <div class="kpi-label">${k.label}</div>
+              <div class="kpi-value">${val}<span class="kpi-unit">${k.unit}</span></div>
+              <small class="${sem.color} sem-foro-texto">${sem.texto}</small>
+            </div></div>`;
+        });
+        html += `</div>`;
+
+        const chartLabels = [
+            'Cob. LPP', 'Inc. LPP', 'Cumpl. CVC', 'Cumpl. VM', 'Cumpl. CUP', 'Flebitis',
+            'Cumpl. PAE', 'Cumpl. Glasgow',
+            'H. Enf.', 'Ratio día', 'Ratio noche', 'Tasa VAP',
+            '% Sedación', '% PIC', '% Ret CVC', '% Ret TET', '% Ret SNG', '% Ret CUP', '% Enc. Satisf.'
+        ];
+        const chartData = [
+            last.coberturaLPP || 0,
+            last.incidenciaLPP || 0,
+            last.cumplimientoCVC || 0,
+            last.cumplimientoVM || 0,
+            last.cumplimientoCUP || 0,
+            last.incidenciaFlebitis || 0,
+            last.cumplimientoPAE || 0,
+            last.cumplimientoGlasgow || 0,
+            last.horasEnfermeria || 0,
+            last.ratioDay || 0,
+            last.ratioNight || 0,
+            last.tasaVAP || 0,
+            last.pctSedation || 0,
+            last.pctPIC || 0,
+            last.pctRetiroCvc || 0,
+            last.pctRetiroTet || 0,
+            last.pctRetiroSng || 0,
+            last.pctRetiroCup || 0,
+            last.pctSurvey || 0
+        ];
+        const colors = ['#0a3d62', '#e74c3c', '#8e44ad', '#1abc9c', '#3498db', '#e84393',
+            '#28a745', '#f39c12',
+            '#6f42c1', '#fd7e14', '#20c997', '#e83e8c',
+            '#0d6efd', '#6610f2', '#d63384', '#dc3545', '#198754', '#ffc107', '#17a2b8'
+        ];
+
+        html += `<div class="row"><div class="col-md-12"><div class="chart-container"><canvas id="chartTodosIndicadores"></canvas></div></div></div>`;
+
+        html += `<div class="card mt-4">
+              <div class="card-header"><i class="fas fa-table me-2"></i>Detalle de indicadores (último mes)</div>
+              <div class="card-body">
+                <div class="table-responsive"><table class="table table-bordered table-striped indicador-tabla">
+                  <thead><tr><th>Indicador</th><th>Numerador</th><th>Denominador</th><th>Resultado</th><th>Estado</th></tr></thead><tbody>`;
+
+        const detalle = [
+            { label: 'Cobertura LPP', num: last.lppEvaluated || 0, den: last.admissions || 0, fmt: 'percent' },
+            { label: 'Incidencia LPP', num: last.lppIncidence || 0, den: last.totalPatients || 0,
+            fmt: 'percent' },
+            { label: 'Tasa EA (x1000)', num: last.adverseEvents || 0, den: last.totalPatients || 0,
+            fmt: 'rate' },
+            { label: 'Tasa Caídas (x1000)', num: last.falls || 0, den: last.totalPatients || 0,
+            fmt: 'rate' },
+            { label: 'Cumpl. CVC', num: last.cvcDone || 0, den: last.cvcTotal || 0, fmt: 'percent' },
+            { label: 'Cumpl. VM', num: last.vmDone || 0, den: last.vmTotal || 0, fmt: 'percent' },
+            { label: 'Cumpl. CUP', num: last.cupDone || 0, den: last.cupTotal || 0, fmt: 'percent' },
+            { label: 'Flebitis (CVP)', num: last.phlebitis || 0, den: last.cvpTotal || 0, fmt: 'percent' },
+            { label: 'Cumpl. PAE', num: (last.paeDay || 0) + (last.paeNight || 0), den: last.paeTotal || 0,
+                fmt: 'percent' },
+            { label: 'Cumpl. Glasgow', num: (last.consciousnessDay || 0) + (last.consciousnessNight || 0),
+                den: last.consciousnessExpected || 0, fmt: 'percent' },
+            { label: 'Horas de Enfermería (24h)', num: last.hoursNursing || 0, den: last.hoursNursingDen || 0,
+                fmt: 'avg' },
+            { label: 'Ratio día', num: last.patientsTurnDay || 0, den: last.nursesDay || 0, fmt: 'avg' },
+            { label: 'Ratio noche', num: last.patientsTurnNight || 0, den: last.nursesNight || 0, fmt: 'avg' },
+            { label: 'Tasa VAP (x1000)', num: last.vapCases || 0, den: last.vmDays || 0, fmt: 'rate' },
+            { label: 'Sedación evaluada', num: last.sedationEvaluated || 0, den: last.sedationTotal || 0,
+                fmt: 'percent' },
+            { label: 'PIC vigilada', num: last.picRegistered || 0, den: last.picTotal || 0, fmt: 'percent' },
+            { label: 'Retiro CVC/CVP', num: last.raCvc || 0, den: last.pacCvc || 0, fmt: 'percent' },
+            { label: 'Retiro TET', num: last.raTet || 0, den: last.pacTet || 0, fmt: 'percent' },
+            { label: 'Retiro SNG/SOG', num: last.raSng || 0, den: last.pacSng || 0, fmt: 'percent' },
+            { label: 'Retiro CUP', num: last.raCup || 0, den: last.pacCup || 0, fmt: 'percent' },
+            { label: 'Encuestas satisfactorias', num: last.surveySatisfied || 0, den: last.surveyApplied || 0,
+                fmt: 'percent' },
+        ];
+
+        detalle.forEach(ind => {
+            let resultado = '—';
+            let val = 0;
+            if (ind.den === 0) {
+                resultado = '—';
+            } else if (ind.fmt === 'absolute') {
+                val = ind.num || 0;
+                resultado = val.toString();
+            } else {
+                const num = ind.num || 0;
+                const den = ind.den || 0;
+                if (ind.fmt === 'percent') { val = (num / den) * 100;
+                    resultado = val.toFixed(1) + '%'; } else if (ind.fmt === 'rate') { val = (num / den) *
+                        1000;
+                    resultado = val.toFixed(1); } else if (ind.fmt === 'avg') { val = num / den;
+                    resultado = val.toFixed(1); } else { val = num / den;
+                    resultado = val.toFixed(1); }
+            }
+            const sem = obtenerSemaforo(ind.label, val, ind.den || 0);
+            html += `<tr class="${sem.color}">
+                  <td><strong>${ind.label}</strong></td>
+                  <td>${ind.num}</td>
+                  <td>${ind.den}</td>
+                  <td>${resultado}</td>
+                  <td>${sem.texto}</td>
+                </tr>`;
+        });
+
+        html += `</tbody></table></div></div></div>`;
+        container.innerHTML = html;
+
+        setTimeout(() => {
+            const ctx = document.getElementById('chartTodosIndicadores');
+            if (ctx) {
+                if (window.chartTodos) window.chartTodos.destroy();
+                window.chartTodos = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Último mes',
+                            data: chartData,
+                            backgroundColor: colors,
+                            borderRadius: 6,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx =>
+                                    ctx.parsed.y.toFixed(1) } } },
+                        scales: { y: { beginAtZero: true, title: { display: true,
+                                text: 'Valor' } } }
+                    }
+                });
+            }
+        }, 300);
     }
-    await refreshAll();
-    document.getElementById('registerFeedback').innerHTML = `<div class="alert alert-warning">🗑️ Registro del ${date} eliminado.</div>`;
-  }
 
-  // ================================================================
-  // REFRESH Y GUARDAR
-  // ================================================================
-  async function refreshAll() {
-    await renderLastEntries();
-    await renderUltimoRegistroIndicadores();
-    await renderDashboard(FIXED_WARD);
-    await renderReport(FIXED_WARD);
-  }
+    // ================================================================
+    // REPORTE TRIMESTRAL
+    // ================================================================
+    async function renderReport(ward) {
+        const container = document.getElementById('reportContent');
+        const data = await getData();
+        if (data.length === 0) {
+            container.innerHTML =
+                `<div class="alert alert-warning">No hay datos para <strong>${ward}</strong>.</div>`;
+            return;
+        }
 
-  async function saveDailyRecord(e) {
-    e.preventDefault();
-    const date = document.getElementById('regDate').value;
-    if (!date) { alert('Selecciona una fecha.'); return; }
-    updateTotal();
-    const totalPatients = parseInt(document.getElementById('totalPatients').value) || 0;
+        function getQuarter(m) {
+            const mo = parseInt(m.split('-')[1]);
+            if (mo <= 3) return 'Trim I';
+            if (mo <= 6) return 'Trim II';
+            if (mo <= 9) return 'Trim III';
+            return 'Trim IV';
+        }
 
-    const record = {
-      date, ward: FIXED_WARD,
-      startPatients: parseInt(document.getElementById('startPatients').value) || 0,
-      admissions: parseInt(document.getElementById('admissions').value) || 0,
-      discharges: parseInt(document.getElementById('discharges').value) || 0,
-      totalPatients,
-      lppEvaluated: parseInt(document.getElementById('lppEvaluated').value) || 0,
-      lppIncidence: parseInt(document.getElementById('lppIncidence').value) || 0,
-      adverseEvents: parseInt(document.getElementById('adverseEvents').value) || 0,
-      falls: parseInt(document.getElementById('falls').value) || 0,
-      cvcDone: parseInt(document.getElementById('cvcDone').value) || 0,
-      cvcTotal: parseInt(document.getElementById('cvcTotal').value) || 0,
-      vmDone: parseInt(document.getElementById('vmDone').value) || 0,
-      vmTotal: parseInt(document.getElementById('vmTotal').value) || 0,
-      cupDone: parseInt(document.getElementById('cupDone').value) || 0,
-      cupTotal: parseInt(document.getElementById('cupTotal').value) || 0,
-      cvpTotal: parseInt(document.getElementById('cvpTotal').value) || 0,
-      phlebitis: parseInt(document.getElementById('phlebitis').value) || 0,
-      paeDay: parseInt(document.getElementById('paeDay').value) || 0,
-      paeNight: parseInt(document.getElementById('paeNight').value) || 0,
-      paeTotal: parseInt(document.getElementById('paeTotal').value) || 0,
-      consciousness: parseInt(document.getElementById('consciousness').value) || 0,
-      extra: {}
-    };
+        const quarters = {};
+        data.forEach(d => {
+            const key = d.date.substring(0, 7);
+            const q = getQuarter(key);
+            if (!quarters[q]) quarters[q] = [];
+            quarters[q].push(d);
+        });
 
-    const fields = getExtraFields(FIXED_WARD);
-    fields.forEach(f => {
-      record.extra[f.id] = parseInt(document.getElementById(f.id).value) || 0;
-    });
+        const sortedQuarters = ['Trim I', 'Trim II', 'Trim III', 'Trim IV'];
+        const quarterData = {};
+        sortedQuarters.forEach(q => {
+            const records = quarters[q] || [];
+            if (records.length === 0) { quarterData[q] = null; return; }
+            const sum = {};
+            records.forEach(r => {
+                for (const key in r) {
+                    if (typeof r[key] === 'number') {
+                        if (!sum[key]) sum[key] = 0;
+                        sum[key] += r[key];
+                    }
+                }
+                if (r.extra) {
+                    for (const key in r.extra) {
+                        if (typeof r.extra[key] === 'number') {
+                            if (!sum[key]) sum[key] = 0;
+                            sum[key] += r.extra[key];
+                        }
+                    }
+                }
+            });
+            const totalPatients = sum.totalPatients || 0;
+            const admissions = sum.admissions || 0;
+            const ind = {
+                totalPatients,
+                admissions,
+                coberturaLPP: admissions > 0 ? (sum.lppEvaluated || 0) / admissions * 100 : 0,
+                incidenciaLPP: totalPatients > 0 ? (sum.lppIncidence || 0) / totalPatients * 100 : 0,
+                tasaEA: totalPatients > 0 ? (sum.adverseEvents || 0) / totalPatients * 1000 : 0,
+                tasaCaidas: totalPatients > 0 ? (sum.falls || 0) / totalPatients * 1000 : 0,
+                cumplimientoCVC: (sum.cvcTotal || 0) > 0 ? (sum.cvcDone || 0) / (sum.cvcTotal || 0) * 100 :
+                0,
+                cumplimientoVM: (sum.vmTotal || 0) > 0 ? (sum.vmDone || 0) / (sum.vmTotal || 0) * 100 : 0,
+                cumplimientoCUP: (sum.cupTotal || 0) > 0 ? (sum.cupDone || 0) / (sum.cupTotal || 0) * 100 :
+                0,
+                incidenciaFlebitis: (sum.cvpTotal || 0) > 0 ? (sum.phlebitis || 0) / (sum.cvpTotal || 0) *
+                100 : 0,
+                cumplimientoPAE: (sum.paeTotal || 0) > 0 ? ((sum.paeDay || 0) + (sum.paeNight || 0)) / (sum
+                    .paeTotal || 0) * 100 : 0,
+                cumplimientoGlasgow: (sum.consciousnessExpected || 0) > 0 ? ((sum.consciousnessDay || 0) + (
+                    sum.consciousnessNight || 0)) / (sum.consciousnessExpected || 0) * 100 : 0,
+                hoursNursing: sum.hoursNursing || 0,
+                hoursNursingDen: sum.hoursNursingDen || 0,
+                patientsTurnDay: sum.patientsTurnDay || 0,
+                nursesDay: sum.nursesDay || 0,
+                patientsTurnNight: sum.patientsTurnNight || 0,
+                nursesNight: sum.nursesNight || 0,
+                vapCases: sum.vapCases || 0,
+                vmDays: sum.vmDays || 0,
+                sedationEvaluated: sum.sedationEvaluated || 0,
+                sedationTotal: sum.sedationTotal || 0,
+                picRegistered: sum.picRegistered || 0,
+                picTotal: sum.picTotal || 0,
+                raCvc: sum.raCvc || 0,
+                pacCvc: sum.pacCvc || 0,
+                raTet: sum.raTet || 0,
+                pacTet: sum.pacTet || 0,
+                raSng: sum.raSng || 0,
+                pacSng: sum.pacSng || 0,
+                raCup: sum.raCup || 0,
+                pacCup: sum.pacCup || 0,
+                surveySatisfied: sum.surveySatisfied || 0,
+                surveyApplied: sum.surveyApplied || 0,
+            };
+            ind.horasEnfermeria = ind.hoursNursingDen > 0 ? (ind.hoursNursing / ind.hoursNursingDen) : 0;
+            ind.ratioDay = ind.nursesDay > 0 ? (ind.patientsTurnDay / ind.nursesDay) : 0;
+            ind.ratioNight = ind.nursesNight > 0 ? (ind.patientsTurnNight / ind.nursesNight) : 0;
+            ind.tasaVAP = ind.vmDays > 0 ? (ind.vapCases / ind.vmDays * 1000) : 0;
+            ind.pctSedation = ind.sedationTotal > 0 ? (ind.sedationEvaluated / ind.sedationTotal * 100) : 0;
+            ind.pctPIC = ind.picTotal > 0 ? (ind.picRegistered / ind.picTotal * 100) : 0;
+            ind.pctRetiroCvc = ind.pacCvc > 0 ? (ind.raCvc / ind.pacCvc * 100) : 0;
+            ind.pctRetiroTet = ind.pacTet > 0 ? (ind.raTet / ind.pacTet * 100) : 0;
+            ind.pctRetiroSng = ind.pacSng > 0 ? (ind.raSng / ind.pacSng * 100) : 0;
+            ind.pctRetiroCup = ind.pacCup > 0 ? (ind.raCup / ind.pacCup * 100) : 0;
+            ind.pctSurvey = ind.surveyApplied > 0 ? (ind.surveySatisfied / ind.surveyApplied * 100) : 0;
+            quarterData[q] = ind;
+        });
 
-    const success = await saveData(record);
-    if (success) {
-      document.getElementById('registerFeedback').innerHTML = `<div class="alert alert-success">✅ Registro del día <strong>${date}</strong> guardado en la nube.</div>`;
-      await refreshAll();
-    } else {
-      document.getElementById('registerFeedback').innerHTML = `<div class="alert alert-danger">❌ Error al guardar. Revisa la consola.</div>`;
+        let html =
+            `<h4>Reporte Trimestral - ${ward}</h4>
+            <div class="table-responsive"><table class="table table-bordered table-striped table-indicators" id="quarterTable">
+              <thead><tr><th>Indicador</th>${sortedQuarters.map(q => `<th>${q}</th>`).join('')}</tr></thead><tbody>`;
+
+        const rows = [
+            { label: 'Pacientes-día', key: 'totalPatients', fmt: v => v },
+            { label: 'Cobertura LPP', key: 'coberturaLPP', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Incidencia LPP', key: 'incidenciaLPP', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Tasa EA (x1000)', key: 'tasaEA', fmt: v => (v).toFixed(1) },
+            { label: 'Tasa Caídas (x1000)', key: 'tasaCaidas', fmt: v => (v).toFixed(1) },
+            { label: 'Cumpl. CVC', key: 'cumplimientoCVC', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Cumpl. VM', key: 'cumplimientoVM', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Cumpl. CUP', key: 'cumplimientoCUP', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Flebitis (CVP)', key: 'incidenciaFlebitis', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Cumpl. PAE', key: 'cumplimientoPAE', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Cumpl. Glasgow', key: 'cumplimientoGlasgow', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Horas de Enfermería (24h)', key: 'horasEnfermeria', fmt: v => (v).toFixed(1) + ' h/pac' },
+            { label: 'Ratio día', key: 'ratioDay', fmt: v => (v).toFixed(1) + ' pac/enf' },
+            { label: 'Ratio noche', key: 'ratioNight', fmt: v => (v).toFixed(1) + ' pac/enf' },
+            { label: 'Tasa VAP (x1000)', key: 'tasaVAP', fmt: v => (v).toFixed(1) },
+            { label: 'Sedación evaluada', key: 'pctSedation', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'PIC vigilada', key: 'pctPIC', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Retiro CVC/CVP', key: 'pctRetiroCvc', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Retiro TET', key: 'pctRetiroTet', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Retiro SNG/SOG', key: 'pctRetiroSng', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Retiro CUP', key: 'pctRetiroCup', fmt: v => (v).toFixed(1) + '%' },
+            { label: 'Encuestas satisfactorias', key: 'pctSurvey', fmt: v => (v).toFixed(1) + '%' },
+        ];
+
+        rows.forEach(row => {
+            html += `<tr><td><strong>${row.label}</strong></td>`;
+            sortedQuarters.forEach(q => {
+                const qData = quarterData[q];
+                let val = qData ? (qData[row.key] !== undefined ? qData[row.key] : 0) : 0;
+                html += `<td>${row.fmt(val)}</td>`;
+            });
+            html += `</tr>`;
+        });
+
+        html += `</tbody></table>
+            <button class="btn btn-outline-primary mt-3" onclick="copyTable()"><i class="fas fa-copy me-2"></i> Copiar Tabla</button></div>`;
+        container.innerHTML = html;
     }
-  }
 
-  // ================================================================
-  // INICIALIZACIÓN
-  // ================================================================
-  document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('regWard').value = FIXED_WARD;
-    document.getElementById('wardDisplay').innerHTML = `<i class="fas fa-hospital me-1"></i> Unidad UCI`;
-    document.querySelector('.alert-fixed strong').textContent = 'Unidad UCI';
+    function copyTable() {
+        const table = document.getElementById('quarterTable');
+        if (!table) return;
+        const range = document.createRange();
+        range.selectNode(table);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+        alert('Tabla copiada al portapapeles.');
+    }
 
-    renderExtraFields(FIXED_WARD);
-    refreshAll();
-    updateTotal();
+    // ================================================================
+    // ÚLTIMOS REGISTROS
+    // ================================================================
+    async function renderLastEntries() {
+        const container = document.getElementById('lastEntries');
+        const data = await getData();
+        if (data.length === 0) {
+            container.innerHTML = '<p class="text-muted">No hay registros.</p>';
+            return;
+        }
+        let html =
+            `<div class="table-responsive"><table class="table table-sm table-bordered">
+              <thead><tr><th>Fecha</th><th>Inicio</th><th>Ingresos</th><th>Egresos</th><th>Total</th><th>LPP Eval</th><th>Caídas</th><th>PAE Día</th><th>PAE Noche</th><th>Glasgow Día</th><th>Glasgow Noche</th><th>Acción</th></tr></thead><tbody>`;
+        data.slice(0, 15).forEach(r => {
+            html += `<tr>
+                  <td>${r.date}</td>
+                  <td>${r.startPatients||0}</td>
+                  <td>${r.admissions||0}</td>
+                  <td>${r.discharges||0}</td>
+                  <td>${r.totalPatients}</td>
+                  <td>${r.lppEvaluated}</td>
+                  <td>${r.falls}</td>
+                  <td>${r.paeDay||0}</td>
+                  <td>${r.paeNight||0}</td>
+                  <td>${r.consciousnessDay||0}</td>
+                  <td>${r.consciousnessNight||0}</td>
+                  <td><button class="btn-delete-record" onclick="deleteRecord('${r.date}','${r.ward}')"><i class="fas fa-trash-alt"></i></button></td>
+                </tr>`;
+        });
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+    }
 
-    document.getElementById('dailyForm').addEventListener('submit', saveDailyRecord);
-    document.getElementById('regDate').value = new Date().toISOString().split('T')[0];
-    ['startPatients','admissions','discharges'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('input', updateTotal);
-        el.addEventListener('change', updateTotal);
-      }
+    async function deleteRecord(date, ward) {
+        if (!confirm(`¿Eliminar el registro del día ${date}?`)) return;
+        const { error } = await supabaseClient
+            .from('REGISTROS')
+            .delete()
+            .eq('date', date)
+            .eq('ward', ward);
+        if (error) {
+            alert("Error al eliminar.");
+            return;
+        }
+        await refreshAll();
+        document.getElementById('registerFeedback').innerHTML =
+            `<div class="alert alert-warning">🗑️ Registro del ${date} eliminado.</div>`;
+    }
+
+    // ================================================================
+    // GUARDAR REGISTRO
+    // ================================================================
+    async function saveDailyRecord(e) {
+        e.preventDefault();
+        const date = document.getElementById('regDate').value;
+        if (!date) { alert('Selecciona una fecha.'); return; }
+        updateTotal();
+
+        const record = {
+            date,
+            ward: FIXED_WARD,
+            startPatients: parseInt(document.getElementById('startPatients').value) || 0,
+            admissions: parseInt(document.getElementById('admissions').value) || 0,
+            discharges: parseInt(document.getElementById('discharges').value) || 0,
+            totalPatients: parseInt(document.getElementById('totalPatients').value) || 0,
+            lppEvaluated: parseInt(document.getElementById('lppEvaluated').value) || 0,
+            lppIncidence: parseInt(document.getElementById('lppIncidence').value) || 0,
+            adverseEvents: parseInt(document.getElementById('adverseEvents').value) || 0,
+            falls: parseInt(document.getElementById('falls').value) || 0,
+            cvcDone: parseInt(document.getElementById('cvcDone').value) || 0,
+            cvcTotal: parseInt(document.getElementById('cvcTotal').value) || 0,
+            vmDone: parseInt(document.getElementById('vmDone').value) || 0,
+            vmTotal: parseInt(document.getElementById('vmTotal').value) || 0,
+            cupDone: parseInt(document.getElementById('cupDone').value) || 0,
+            cupTotal: parseInt(document.getElementById('cupTotal').value) || 0,
+            cvpTotal: parseInt(document.getElementById('cvpTotal').value) || 0,
+            phlebitis: parseInt(document.getElementById('phlebitis').value) || 0,
+            paeDay: parseInt(document.getElementById('paeDay').value) || 0,
+            paeNight: parseInt(document.getElementById('paeNight').value) || 0,
+            paeTotal: parseInt(document.getElementById('paeTotal').value) || 0,
+            consciousnessDay: parseInt(document.getElementById('consciousnessDay').value) || 0,
+            consciousnessNight: parseInt(document.getElementById('consciousnessNight').value) || 0,
+            consciousnessExpected: parseInt(document.getElementById('consciousnessExpected').value) || 0,
+            extra: {}
+        };
+
+        UCIN_FIELDS.forEach(f => {
+            record.extra[f.num] = parseInt(document.getElementById(f.num).value) || 0;
+            record.extra[f.den] = parseInt(document.getElementById(f.den).value) || 0;
+        });
+
+        const success = await saveData(record);
+        if (success) {
+            document.getElementById('registerFeedback').innerHTML =
+                `<div class="alert alert-success">✅ Registro del día <strong>${date}</strong> guardado en la nube.</div>`;
+            await refreshAll();
+        } else {
+            document.getElementById('registerFeedback').innerHTML =
+                `<div class="alert alert-danger">❌ Error al guardar. Revisa la consola.</div>`;
+        }
+    }
+
+    // ================================================================
+    // REFRESH
+    // ================================================================
+    async function refreshAll() {
+        await renderLastEntries();
+        await renderUltimoRegistroIndicadores();
+        await renderDashboard(FIXED_WARD);
+        await renderReport(FIXED_WARD);
+    }
+
+    // ================================================================
+    // INICIALIZACIÓN
+    // ================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('regWard').value = FIXED_WARD;
+        document.getElementById('wardDisplay').innerHTML = `<i class="fas fa-hospital me-1"></i> Unidad UCI`;
+        document.querySelector('.alert-fixed strong').textContent = 'Unidad UCI';
+
+        renderExtraFields();
+        refreshAll();
+        updateTotal();
+
+        document.getElementById('dailyForm').addEventListener('submit', saveDailyRecord);
+        document.getElementById('regDate').value = new Date().toISOString().split('T')[0];
+        ['startPatients', 'admissions', 'discharges'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', updateTotal);
+                el.addEventListener('change', updateTotal);
+            }
+        });
     });
-  });
 </script>
 </body>
 </html>

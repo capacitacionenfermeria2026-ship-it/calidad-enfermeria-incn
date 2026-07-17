@@ -1,500 +1,1228 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard General - Calidad Enfermería</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body { background: #f4f8fc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .navbar-custom { background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 12px 0; }
-    .navbar-brand { font-weight: 700; font-size: 1.5rem; color: #0a3d62 !important; }
-    .navbar-brand i { color: #2c7da0; }
-    .badge-ward { background: #2c7da0; color: white; padding: 8px 20px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; }
-    .card { border: none; border-radius: 18px; box-shadow: 0 8px 25px rgba(0,0,0,0.04); margin-bottom: 24px; background: white; }
-    .card-header { background: white; border-bottom: 2px solid #eef2f7; font-weight: 600; color: #0a3d62; padding: 16px 20px; border-radius: 18px 18px 0 0 !important; }
-    .card-header i { color: #2c7da0; margin-right: 8px; }
-    .kpi-card { background: white; border-radius: 14px; padding: 18px 20px; border-left: 6px solid #0a3d62; box-shadow: 0 4px 12px rgba(0,0,0,0.02); height: 100%; }
-    .kpi-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; font-weight: 600; }
-    .kpi-value { font-size: 2rem; font-weight: 700; color: #0a3d62; line-height: 1.2; }
-    .kpi-unit { font-size: 1rem; color: #6c757d; margin-left: 4px; }
-    .table-general th { background: #0a3d62; color: white; font-weight: 500; font-size: 0.8rem; text-align: center; vertical-align: middle; white-space: nowrap; }
-    .table-general td { text-align: center; vertical-align: middle; font-size: 0.85rem; padding: 6px 4px; }
-    .table-general tr:nth-child(even) { background: #f9fcff; }
-    .status-green { background-color: #d4edda; color: #155724; font-weight: bold; }
-    .status-yellow { background-color: #fff3cd; color: #856404; font-weight: bold; }
-    .status-red { background-color: #f8d7da; color: #721c24; font-weight: bold; }
-    .chart-container { position: relative; height: 350px; width: 100%; }
-    .form-select-sm { border-radius: 30px; border: 1px solid #dce4ec; padding: 6px 20px; }
-    .table-responsive { overflow-x: auto; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calidad Enfermería - Jefatura (General)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* (estilos sin cambios, igual que en tu archivo) */
+        body { background: linear-gradient(135deg, #f0f7fc 0%, #e6f0f9 100%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-custom { background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 12px 0; }
+        .navbar-brand { font-weight: 700; font-size: 1.5rem; color: #0a3d62 !important; }
+        .navbar-brand i { color: #2c7da0; }
+        .badge-ward { background: #8e44ad; color: white; padding: 8px 20px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; }
+        .card { border: none; border-radius: 18px; box-shadow: 0 8px 25px rgba(0,0,0,0.04); margin-bottom: 24px; background: white; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-2px); }
+        .card-header { background: white; border-bottom: 2px solid #eef2f7; font-weight: 600; color: #0a3d62; padding: 16px 20px; border-radius: 18px 18px 0 0 !important; }
+        .card-header i { color: #8e44ad; margin-right: 8px; }
+        .kpi-card { background: white; border-radius: 14px; padding: 18px 20px; border-left: 6px solid #8e44ad; box-shadow: 0 4px 12px rgba(0,0,0,0.02); height: 100%; transition: 0.3s; position: relative; }
+        .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.06); }
+        .kpi-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.3px; color: #6c757d; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        .kpi-label i { color: #8e44ad; font-size: 0.9rem; cursor: help; }
+        .kpi-value { font-size: 1.6rem; font-weight: 700; color: #0a3d62; line-height: 1.2; }
+        .kpi-unit { font-size: 0.9rem; color: #6c757d; margin-left: 4px; }
+        .table-indicators th { background: #8e44ad; color: white; font-weight: 500; font-size: 0.8rem; text-align: center; vertical-align: middle; }
+        .table-indicators td { text-align: center; vertical-align: middle; font-size: 0.85rem; }
+        .table-indicators tr:nth-child(even) { background: #f9fcff; }
+        .nav-tabs .nav-link { color: #495057; font-weight: 500; border: none; border-bottom: 3px solid transparent; }
+        .nav-tabs .nav-link.active { color: #8e44ad; border-bottom: 3px solid #8e44ad; background: transparent; }
+        .nav-tabs .nav-link:hover { border-bottom-color: #8e44ad; color: #8e44ad; }
+        .chart-container { position: relative; height: 250px; width: 100%; margin-bottom: 20px; }
+        .chart-container-comparativa { position: relative; height: 300px; width: 100%; margin-bottom: 20px; }
+        .form-label { font-weight: 600; color: #343a40; font-size: 0.85rem; }
+        .form-control { border-radius: 30px; border: 1px solid #dce4ec; padding: 6px 16px; }
+        .form-control:focus { border-color: #8e44ad; box-shadow: 0 0 0 0.2rem rgba(142,68,173,0.2); }
+        .btn-primary { background: #8e44ad; border: none; border-radius: 30px; padding: 10px 30px; font-weight: 600; transition: 0.3s; }
+        .btn-primary:hover { background: #6c3483; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(142,68,173,0.3); }
+        .alert-fixed { background: #d4edda; border-color: #c3e6cb; color: #155724; border-radius: 30px; padding: 10px 20px; margin-bottom: 20px; }
+        .alert-fixed i { margin-right: 10px; }
+        .filters-bar { background: white; border-radius: 18px; padding: 15px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); margin-bottom: 20px; }
+        .comparativa-card { background: white; border-radius: 18px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); margin-top: 20px; }
+        .comparativa-card .card-header { background: white; border-bottom: 2px solid #eef2f7; font-weight: 600; color: #0a3d62; padding: 0 0 15px 0; border-radius: 0 !important; }
+        .comparativa-card .card-header i { color: #8e44ad; margin-right: 8px; }
+        .indicador-tabla th { background: #8e44ad; color: white; font-weight: 500; font-size: 0.85rem; text-align: center; vertical-align: middle; }
+        .indicador-tabla td { text-align: center; vertical-align: middle; font-size: 0.9rem; }
+        .table-sm th, .table-sm td { padding: 6px 8px; font-size: 0.85rem; }
+        .status-green { background-color: #d4edda; color: #155724; }
+        .status-yellow { background-color: #fff3cd; color: #856404; }
+        .status-red { background-color: #f8d7da; color: #721c24; }
+        .status-neutral { background-color: #f8f9fa; color: #6c757d; }
+        .sem-foro-texto { font-size: 0.65rem; font-weight: 600; display: block; margin-top: 2px; }
+        .section-title { color: #8e44ad; font-weight: 600; font-size: 1.1rem; margin-top: 15px; margin-bottom: 10px; border-bottom: 2px solid #eef2f7; padding-bottom: 5px; }
+    </style>
 </head>
 <body>
 
 <nav class="navbar-custom">
-  <div class="container d-flex justify-content-between align-items-center">
-    <span class="navbar-brand"><i class="fas fa-heartbeat me-2"></i>Calidad Enfermería</span>
-    <span class="badge-ward"><i class="fas fa-chart-pie me-1"></i> Dashboard General</span>
-  </div>
+    <div class="container d-flex justify-content-between align-items-center">
+        <span class="navbar-brand"><i class="fas fa-heartbeat me-2"></i>Calidad Enfermería</span>
+        <span class="badge-ward" id="wardDisplay"><i class="fas fa-chart-line me-1"></i> Jefatura (General)</span>
+    </div>
 </nav>
 
 <div class="container mt-4">
-  <div class="alert alert-info">
-    <i class="fas fa-database me-2"></i> Consolidado de <strong>todas las salas</strong> – Datos en tiempo real desde la nube.
-  </div>
+    <div class="alert-fixed">
+        <i class="fas fa-globe"></i> Panel General Consolidado – <strong>Todas las salas</strong>. Datos actualizados en tiempo real desde la nube.
+    </div>
 
-  <!-- Filtros -->
-  <div class="row mb-4 align-items-end">
-    <div class="col-md-4">
-      <label class="fw-bold"><i class="fas fa-calendar-alt me-2"></i>Mes:</label>
-      <select id="monthSelector" class="form-select form-select-sm" onchange="cargarDashboard(this.value)">
-        <option value="">Cargando...</option>
-      </select>
-    </div>
-    <div class="col-md-4">
-      <label class="fw-bold"><i class="fas fa-chart-bar me-2"></i>Indicador para gráfico:</label>
-      <select id="chartIndicatorSelect" class="form-select form-select-sm" onchange="actualizarGrafico()">
-        <option value="">Cargando indicadores...</option>
-      </select>
-    </div>
-    <div class="col-md-4 text-end">
-      <span class="badge bg-success me-1"><i class="fas fa-circle"></i> Verde: ≥90%</span>
-      <span class="badge bg-warning text-dark me-1"><i class="fas fa-circle"></i> Amarillo: 70-89%</span>
-      <span class="badge bg-danger"><i class="fas fa-circle"></i> Rojo: &lt;70%</span>
-    </div>
-  </div>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item"><button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab"><i class="fas fa-chart-line me-2"></i>Dashboard General</button></li>
+        <li class="nav-item"><button class="nav-link" id="comparativa-tab" data-bs-toggle="tab" data-bs-target="#comparativa" type="button" role="tab"><i class="fas fa-arrow-right-arrow-left me-2"></i>Comparativa por Sala</button></li>
+        <li class="nav-item"><button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report" type="button" role="tab"><i class="fas fa-file-alt me-2"></i>Reporte Trimestral</button></li>
+    </ul>
 
-  <!-- KPIs Globales -->
-  <div id="kpisGlobales" class="row g-3 mb-4"></div>
-
-  <!-- Gráfico -->
-  <div class="card">
-    <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Comparativa de indicadores por sala (todas las salas)</div>
-    <div class="card-body">
-      <div class="chart-container"><canvas id="chartGeneral"></canvas></div>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+            <div id="dashboardContent"><div class="alert alert-info">Cargando datos...</div></div>
+        </div>
+        <div class="tab-pane fade" id="comparativa" role="tabpanel">
+            <div id="comparativaContent"><div class="alert alert-info">Cargando comparativa...</div></div>
+        </div>
+        <div class="tab-pane fade" id="report" role="tabpanel">
+            <div id="reportContent"><div class="alert alert-info">Cargando reporte...</div></div>
+        </div>
     </div>
-  </div>
-
-  <!-- Tabla completa con semáforos -->
-  <div class="card">
-    <div class="card-header"><i class="fas fa-table me-2"></i>Indicadores detallados por sala (con semáforos)</div>
-    <div class="card-body" id="tablaSalas" style="overflow-x:auto;">
-      <p class="text-muted">Cargando datos...</p>
-    </div>
-  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+</script>
 <script>
-  // ================================================================
-  // CONFIGURACIÓN SUPABASE
-  // ================================================================
-  const SUPABASE_URL = 'https://hdhqzawcylkvttsqqjty.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_x5r7hUrN2pzVexbtZ_b0Wg_OBDEMAKP';
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ================================================================
+    // CONFIGURACIÓN SUPABASE
+    // ================================================================
+    const SUPABASE_URL = 'https://hdhqzawcylkvttsqqjty.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_x5r7hUrN2pzVexbtZ_b0Wg_OBDEMAKP';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // ================================================================
-  // LISTA DE TODAS LAS SALAS (actualiza aquí si agregas más)
-  // ================================================================
-  const SALAS = [
-    'Sala San Jose',
-    'Sala San Luis',
-    'Sala San Vicente',
-    'Sala Inmaculada',
-    'Sala Santa Ana',
-    'Sala La Virgen',
-    'Sala Jesus Maria',
-    'Sala El Rosario',
-    'Sala Corazon de Jesus',
-    'Sala San Miguel',
-    'Unidad UCI',
-    'Unidad UCIN',
-    'Emergencia'
-  ];
+    const EXCLUDED_WARDS = ['General', 'Jefatura'];
 
-  // ================================================================
-  // CONFIGURACIÓN DE INDICADORES EXTRAS (todos los posibles)
-  // ================================================================
-  const EXTRA_INDICATORS = {
-    'wells': { label: 'Wells (TVP)', numerator: 'wellsApplied', denominator: 'wellsTotal', format: 'percent' },
-    'dysphagia': { label: 'Test Disfagia', numerator: 'dysphagiaApplied', denominator: 'dysphagiaTotal', format: 'percent' },
-    'aspiration': { label: 'Riesgo Aspiración', numerator: 'aspirationRisk', denominator: 'aspirationTotal', format: 'percent' },
-    'surgery': { label: 'Cirugías Programadas', numerator: 'surgeryDone', denominator: 'surgeryTotal', format: 'percent' },
-    'raCvc': { label: 'Retiro CVC/CVP', numerator: 'raCvc', denominator: 'pacCvc', format: 'percent' },
-    'raTet': { label: 'Retiro TET', numerator: 'raTet', denominator: 'pacTet', format: 'percent' },
-    'raSng': { label: 'Retiro SNG', numerator: 'raSng', denominator: 'pacSng', format: 'percent' },
-    'raCup': { label: 'Retiro CUP', numerator: 'raCup', denominator: 'pacCup', format: 'percent' },
-    'sedation': { label: 'Sedación evaluada', numerator: 'sedationEvaluated', denominator: 'sedationTotal', format: 'percent' },
-    'pic': { label: 'PIC vigilada', numerator: 'picRegistered', denominator: 'picTotal', format: 'percent' },
-    'vap': { label: 'Tasa VAP (x1000)', numerator: 'vapCases', denominator: 'vmDays', format: 'rate' },
-    'glasgow': { label: 'Glasgow completo', numerator: 'glasgowComplete', denominator: 'glasgowTotal', format: 'percent' },
-    'triage': { label: 'Tiempo Triaje (min)', numerator: 'timeTriageSum', denominator: 'patientsTriaged', format: 'avg' },
-    'thrombolysis': { label: 'Tiempo Trombólisis', numerator: 'timeThrombolysisSum', denominator: 'thrombolysedPatients', format: 'avg' },
-    'obs': { label: 'Tiempo Observación', numerator: 'obsStaySum', denominator: 'obsPatients', format: 'avg' },
-    'emergencyFalls': { label: 'Caídas Emergencia', numerator: 'emergencyFalls', denominator: 'emergencyTotalPatients', format: 'percent' },
-    'relPacEnf': { label: 'Pac/Enfermera', numerator: 'patientsAttended', denominator: 'nursesScheduled', format: 'ratio' },
-  };
-
-  // ================================================================
-  // OBTENER TODOS LOS REGISTROS
-  // ================================================================
-  async function getData() {
-    const { data, error } = await supabaseClient
-      .from("REGISTROS")
-      .select("*")
-      .order("date", { ascending: true });
-    if (error) { console.error(error); return []; }
-    return data.map(row => ({ ...row.data, ward: row.ward, date: row.date }));
-  }
-
-  // ================================================================
-  // FUNCIÓN PARA CALCULAR MÉTRICAS POR SALA PARA UN MES DADO
-  // ================================================================
-  function calcularMetricas(registros, mes) {
-    const filtrados = registros.filter(r => r.date && r.date.startsWith(mes));
-    const resultado = {};
-
-    SALAS.forEach(sala => {
-      const registrosSala = filtrados.filter(r => r.ward === sala);
-      if (registrosSala.length === 0) {
-        resultado[sala] = { totalPatients: 0, disponible: false };
-        return;
-      }
-
-      const sums = {};
-      registrosSala.forEach(r => {
-        for (const key in r) {
-          if (typeof r[key] === 'number') {
-            if (!sums[key]) sums[key] = 0;
-            sums[key] += r[key];
-          }
-        }
-        if (r.extra) {
-          for (const key in r.extra) {
-            if (typeof r.extra[key] === 'number') {
-              if (!sums[key]) sums[key] = 0;
-              sums[key] += r.extra[key];
-            }
-          }
-        }
-      });
-
-      const total = sums.totalPatients || 0;
-      const metrics = {
-        totalPatients: total,
-        disponible: true,
-        coberturaLPP: total > 0 ? ((sums.lppEvaluated || 0) / total * 100) : 0,
-        incidenciaLPP: total > 0 ? ((sums.lppIncidence || 0) / total * 100) : 0,
-        tasaEA: total > 0 ? ((sums.adverseEvents || 0) / total * 1000) : 0,
-        tasaCaidas: total > 0 ? ((sums.falls || 0) / total * 1000) : 0,
-        cumplimientoCVC: (sums.cvcTotal || 0) > 0 ? ((sums.cvcDone || 0) / (sums.cvcTotal || 0) * 100) : 0,
-        cumplimientoVM: (sums.vmTotal || 0) > 0 ? ((sums.vmDone || 0) / (sums.vmTotal || 0) * 100) : 0,
-        cumplimientoCUP: (sums.cupTotal || 0) > 0 ? ((sums.cupDone || 0) / (sums.cupTotal || 0) * 100) : 0,
-        incidenciaFlebitis: (sums.cvpTotal || 0) > 0 ? ((sums.phlebitis || 0) / (sums.cvpTotal || 0) * 100) : 0,
-        cumplimientoPAE: (sums.paeTotal || 0) > 0 ? (((sums.paeDay || 0)+(sums.paeNight || 0)) / (sums.paeTotal || 0) * 100) : 0,
-        conciencia: total > 0 ? ((sums.consciousness || 0) / total * 100) : 0,
-      };
-
-      for (const key in EXTRA_INDICATORS) {
-        const def = EXTRA_INDICATORS[key];
-        const num = sums[def.numerator] || 0;
-        const den = sums[def.denominator] || 0;
-        let valor = 0;
-        let disponible = false;
-        if (den > 0) {
-          disponible = true;
-          if (def.format === 'percent') valor = (num / den) * 100;
-          else if (def.format === 'rate') valor = (num / den) * 1000;
-          else if (def.format === 'avg') valor = num / den;
-          else if (def.format === 'ratio') valor = num / den;
-          else valor = num / den;
-        }
-        metrics[key] = { label: def.label, valor, num, den, format: def.format, disponible };
-      }
-
-      resultado[sala] = metrics;
-    });
-
-    return resultado;
-  }
-
-  // ================================================================
-  // RENDERIZAR DASHBOARD
-  // ================================================================
-  let datosGlobales = {};
-  let mesActual = '';
-
-  async function cargarDashboard(mesSeleccionado) {
-    const registros = await getData();
-    if (registros.length === 0) {
-      document.getElementById('tablaSalas').innerHTML = '<div class="alert alert-warning">No hay registros en la base de datos.</div>';
-      return;
+    // ================================================================
+    // NORMALIZACIÓN DE NOMBRES DE SALA (SIN TILDES Y UNIFICADA)
+    // ================================================================
+    function normalizarNombreSala(nombre) {
+        if (!nombre) return '';
+        let n = nombre.trim();
+        // Quitar prefijo "Sala " si existe
+        if (n.startsWith('Sala ')) n = n.substring(5);
+        // Mapa de equivalencias para nombres especiales (con tilde → sin tilde)
+        const mapa = {
+            'Corazón de Jesús': 'Corazon de Jesus',
+            'Corazon de Jesus': 'Corazon de Jesus',
+            'Jesús María': 'Jesus Maria',
+            'Jesus Maria': 'Jesus Maria',
+            'San José': 'San Jose',
+            'San Jose': 'San Jose',
+            // Agrega aquí otros nombres que requieran unificación manual
+        };
+        if (mapa[n]) return mapa[n];
+        // Eliminar tildes de forma genérica (para cualquier otro nombre)
+        n = n.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        // Capitalizar cada palabra (primera letra mayúscula)
+        n = n.toLowerCase().replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+        return n;
     }
 
-    const mesesSet = new Set();
-    registros.forEach(r => { if (r.date) mesesSet.add(r.date.substring(0,7)); });
-    const meses = Array.from(mesesSet).sort();
-    if (meses.length === 0) {
-      document.getElementById('tablaSalas').innerHTML = '<div class="alert alert-warning">No hay fechas disponibles.</div>';
-      return;
-    }
-
-    const selector = document.getElementById('monthSelector');
-    if (!mesSeleccionado || !meses.includes(mesSeleccionado)) {
-      mesSeleccionado = meses[meses.length - 1];
-    }
-    mesActual = mesSeleccionado;
-    selector.innerHTML = meses.map(m => {
-      const [y, mo] = m.split('-');
-      const label = `${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Set','Oct','Nov','Dic'][parseInt(mo)-1]} ${y}`;
-      return `<option value="${m}" ${m === mesSeleccionado ? 'selected' : ''}>${label}</option>`;
-    }).join('');
-
-    datosGlobales = calcularMetricas(registros, mesSeleccionado);
-
-    const baseKeys = [
-      'coberturaLPP', 'incidenciaLPP', 'tasaEA', 'tasaCaidas',
-      'cumplimientoCVC', 'cumplimientoVM', 'cumplimientoCUP',
-      'incidenciaFlebitis', 'cumplimientoPAE', 'conciencia'
-    ];
-    const extraKeys = Object.keys(EXTRA_INDICATORS);
-    const allKeys = [...baseKeys, ...extraKeys];
-    const labelMap = {
-      'coberturaLPP': 'Cobertura LPP',
-      'incidenciaLPP': 'Incidencia LPP',
-      'tasaEA': 'Tasa EA (x1000)',
-      'tasaCaidas': 'Tasa Caídas (x1000)',
-      'cumplimientoCVC': 'Cumplimiento CVC',
-      'cumplimientoVM': 'Cumplimiento VM',
-      'cumplimientoCUP': 'Cumplimiento CUP',
-      'incidenciaFlebitis': 'Flebitis (CVP)',
-      'cumplimientoPAE': 'Cumplimiento PAE',
-      'conciencia': 'Conciencia'
-    };
-    for (const key in EXTRA_INDICATORS) {
-      labelMap[key] = EXTRA_INDICATORS[key].label;
-    }
-
-    const indicatorSelect = document.getElementById('chartIndicatorSelect');
-    indicatorSelect.innerHTML = allKeys.map(key => {
-      const label = labelMap[key] || key.replace(/([A-Z])/g, ' $1').trim();
-      return `<option value="${key}">${label}</option>`;
-    }).join('');
-    if (allKeys.length > 0) {
-      indicatorSelect.value = allKeys[0];
-    }
-
-    renderKPIs(datosGlobales);
-    renderTabla(datosGlobales);
-    actualizarGrafico();
-  }
-
-  // ================================================================
-  // KPIS GLOBALES
-  // ================================================================
-  function renderKPIs(data) {
-    let totalPac = 0, salasActivas = 0, salasVerdes = 0, salasRojas = 0;
-    let sumCob = 0, countCob = 0;
-
-    for (const sala in data) {
-      const d = data[sala];
-      if (d.disponible && d.totalPatients > 0) {
-        totalPac += d.totalPatients;
-        salasActivas++;
-        if (d.coberturaLPP >= 90) salasVerdes++;
-        else if (d.coberturaLPP < 70 && d.coberturaLPP > 0) salasRojas++;
-        if (d.coberturaLPP > 0) { sumCob += d.coberturaLPP; countCob++; }
-      }
-    }
-    const avgCob = countCob > 0 ? sumCob / countCob : 0;
-
-    const kpis = [
-      { label: 'Pacientes-día totales', value: totalPac, unit: '' },
-      { label: 'Salas activas', value: salasActivas, unit: '' },
-      { label: 'Cobertura LPP (prom.)', value: avgCob, unit: '%' },
-      { label: 'Salas en VERDE', value: salasVerdes, unit: '✅' },
-      { label: 'Salas en ROJO', value: salasRojas, unit: '⚠️' },
-    ];
-    document.getElementById('kpisGlobales').innerHTML = kpis.map(k =>
-      `<div class="col-md-2 col-sm-4 col-6">
-        <div class="kpi-card">
-          <div class="kpi-label">${k.label}</div>
-          <div class="kpi-value">${typeof k.value === 'number' ? k.value.toFixed(1) : k.value}<span class="kpi-unit">${k.unit}</span></div>
-        </div>
-      </div>`
-    ).join('');
-  }
-
-  // ================================================================
-  // TABLA CON SEMÁFOROS
-  // ================================================================
-  function renderTabla(data) {
-    const metricKeys = new Set(['totalPatients']);
-    const baseKeys = ['coberturaLPP', 'incidenciaLPP', 'tasaEA', 'tasaCaidas', 'cumplimientoCVC', 'cumplimientoVM', 'cumplimientoCUP', 'incidenciaFlebitis', 'cumplimientoPAE', 'conciencia'];
-    baseKeys.forEach(k => metricKeys.add(k));
-    for (const key in EXTRA_INDICATORS) {
-      metricKeys.add(key);
-    }
-
-    const labelMap = {
-      'totalPatients': 'Pacientes',
-      'coberturaLPP': 'Cob. LPP',
-      'incidenciaLPP': 'Inc. LPP',
-      'tasaEA': 'Tasa EA',
-      'tasaCaidas': 'Tasa Caídas',
-      'cumplimientoCVC': 'Cumpl. CVC',
-      'cumplimientoVM': 'Cumpl. VM',
-      'cumplimientoCUP': 'Cumpl. CUP',
-      'incidenciaFlebitis': 'Flebitis',
-      'cumplimientoPAE': 'Cumpl. PAE',
-      'conciencia': 'Conciencia'
-    };
-    for (const key in EXTRA_INDICATORS) {
-      labelMap[key] = EXTRA_INDICATORS[key].label;
-    }
-
-    const columns = Array.from(metricKeys);
-    const order = ['totalPatients', 'coberturaLPP', 'incidenciaLPP', 'tasaEA', 'tasaCaidas', 
-                   'cumplimientoCVC', 'cumplimientoVM', 'cumplimientoCUP', 'incidenciaFlebitis', 
-                   'cumplimientoPAE', 'conciencia'];
-    columns.sort((a, b) => {
-      const ia = order.indexOf(a), ib = order.indexOf(b);
-      if (ia !== -1 && ib !== -1) return ia - ib;
-      if (ia !== -1) return -1;
-      if (ib !== -1) return 1;
-      return a.localeCompare(b);
-    });
-
-    let html = `<table class="table table-bordered table-striped table-general">
-      <thead><tr><th>Sala</th>`;
-    columns.forEach(col => {
-      const label = labelMap[col] || col.replace(/([A-Z])/g, ' $1').trim();
-      html += `<th>${label}</th>`;
-    });
-    html += `<th>Estado</th></tr></thead><tbody>`;
-
-    for (const sala of SALAS) {
-      const d = data[sala];
-      if (!d || !d.disponible) {
-        html += `<tr><td><strong>${sala}</strong></td><td colspan="${columns.length+1}" class="text-muted">Sin datos</td></tr>`;
-        continue;
-      }
-      html += `<tr><td><strong>${sala}</strong></td>`;
-      let redCount = 0, yellowCount = 0, greenCount = 0;
-
-      columns.forEach(col => {
-        let valor = d[col];
-        let display = '-';
-        let clase = '';
-
-        if (col === 'totalPatients') {
-          display = valor || 0;
-        } else if (typeof valor === 'object' && valor !== null) {
-          if (valor.disponible) {
-            display = valor.valor.toFixed(1) + (valor.format === 'percent' ? '%' : valor.format === 'rate' ? '' : '');
-            if (valor.format === 'percent') {
-              if (valor.valor >= 90) { clase = 'status-green'; greenCount++; }
-              else if (valor.valor >= 70) { clase = 'status-yellow'; yellowCount++; }
-              else { clase = 'status-red'; redCount++; }
-            }
-          } else {
-            display = 'N/A';
-          }
-        } else if (typeof valor === 'number') {
-          if (col !== 'totalPatients') {
-            display = valor.toFixed(1) + '%';
-            if (valor >= 90) { clase = 'status-green'; greenCount++; }
-            else if (valor >= 70) { clase = 'status-yellow'; yellowCount++; }
-            else if (valor > 0) { clase = 'status-red'; redCount++; }
-          } else {
-            display = valor;
-          }
-        }
-        html += `<td class="${clase}">${display}</td>`;
-      });
-
-      let estadoClass = 'status-green';
-      let estadoText = '🟢 OK';
-      if (redCount >= 2) { estadoClass = 'status-red'; estadoText = '🔴 Crítico'; }
-      else if (redCount >= 1 || yellowCount >= 3) { estadoClass = 'status-yellow'; estadoText = '🟡 Alerta'; }
-      html += `<td class="${estadoClass}">${estadoText}</td>`;
-      html += `</tr>`;
-    }
-    html += '</tbody></table>';
-    document.getElementById('tablaSalas').innerHTML = html;
-  }
-
-  // ================================================================
-  // GRÁFICO
-  // ================================================================
-  let chartInstance = null;
-
-  function actualizarGrafico() {
-    const indicator = document.getElementById('chartIndicatorSelect').value;
-    if (!indicator) return;
-    const ctx = document.getElementById('chartGeneral').getContext('2d');
-    if (chartInstance) chartInstance.destroy();
-
-    const labels = [];
-    const data = [];
-    const colors = [];
-
-    for (const sala of SALAS) {
-      const d = datosGlobales[sala];
-      let val = 0;
-      if (d && d.disponible) {
-        if (typeof d[indicator] === 'object' && d[indicator] !== null) {
-          val = d[indicator].valor || 0;
+    // ================================================================
+    // SEMÁFORO (UNIFORME)
+    // ================================================================
+    function obtenerSemaforo(nombre, valor, denominador) {
+        if (denominador === 0) return { color: 'status-neutral', texto: 'N/A' };
+        const u = {
+            'Cobertura LPP': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Incidencia LPP': { verde: 5, amarillo: 12, rojo: 20, invertido: true },
+            'Tasa EA (x1000)': { verde: 30, amarillo: 60, rojo: 120, invertido: true },
+            'Tasa Caídas (x1000)': { verde: 20, amarillo: 50, rojo: 100, invertido: true },
+            'Cumpl. CVC': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Cumpl. VM': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Cumpl. CUP': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Flebitis (CVP)': { verde: 5, amarillo: 10, rojo: 20, invertido: true },
+            'Cumpl. PAE': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Cumpl. Glasgow': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Evaluación Wells (TVP)': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Test de Disfagia': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Riesgo de Aspiración': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Incidencia de aspiración en pacientes con riesgo': { verde: 5, amarillo: 10, rojo: 20, invertido: true },
+            'Cumplimiento cirugías programadas': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Horas Enfermería (24h)': { verde: 12, amarillo: 8, rojo: 5, invertido: false },
+            'Ratio día': { verde: 2, amarillo: 3, rojo: 4, invertido: false },
+            'Ratio noche': { verde: 2.5, amarillo: 3.5, rojo: 5, invertido: false },
+            'Tasa VAP (x1000)': { verde: 10, amarillo: 20, rojo: 40, invertido: true },
+            'Sedación evaluada': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'PIC vigilada': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Retiro CVC/CVP': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Retiro TET': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Retiro SNG/SOG': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Retiro CUP': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Encuestas satisfactorias': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Cumplimiento registros perioperatorios': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Cumplimiento conteo instrumental': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Cumplimiento higiene de manos': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Cumplimiento posicionamiento seguro': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Incidencia de LPP quirúrgicas': { verde: 2, amarillo: 5, rojo: 10, invertido: true },
+            'Cumplimiento Lista de Verificación': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Cumplimiento identificación segura': { verde: 90, amarillo: 70, rojo: 50, invertido: false },
+            'Relación Pac/Enf (global)': { verde: 2, amarillo: 3, rojo: 4, invertido: true },
+            'Relación Pac/Enf (DÍA)': { verde: 2, amarillo: 3, rojo: 4, invertido: true },
+            'Relación Pac/Enf (NOCHE)': { verde: 2, amarillo: 3, rojo: 4, invertido: true },
+            'Tiempo Triaje (min)': { verde: 5, amarillo: 10, rojo: 15, invertido: true },
+            'Tiempo Trombólisis (min)': { verde: 30, amarillo: 45, rojo: 60, invertido: true },
+            'Tiempo Observación (min)': { verde: 120, amarillo: 180, rojo: 240, invertido: true },
+        };
+        const umb = u[nombre] || { verde: 90, amarillo: 70, rojo: 50, invertido: false };
+        let color, texto;
+        if (umb.invertido) {
+            if (valor <= umb.verde) { color = 'status-green';
+                texto = 'Cumplido'; } else if (valor <= umb.amarillo) { color = 'status-yellow';
+                texto = 'En observación'; } else if (valor <= umb.rojo) { color = 'status-yellow';
+                texto = 'En observación'; } else { color = 'status-red';
+                texto = 'Revisar'; }
         } else {
-          val = d[indicator] || 0;
+            if (valor >= umb.verde) { color = 'status-green';
+                texto = 'Cumplido'; } else if (valor >= umb.amarillo) { color = 'status-yellow';
+                texto = 'En observación'; } else if (valor >= umb.rojo) { color = 'status-yellow';
+                texto = 'En observación'; } else { color = 'status-red';
+                texto = 'Revisar'; }
         }
-      }
-      labels.push(sala);
-      data.push(val);
-      if (val >= 90) colors.push('#28a745');
-      else if (val >= 70) colors.push('#ffc107');
-      else if (val > 0) colors.push('#dc3545');
-      else colors.push('#6c757d');
+        return { color, texto };
     }
 
-    if (labels.length === 0) return;
-
-    const selectedLabel = document.getElementById('chartIndicatorSelect').selectedOptions[0]?.text || indicator;
-    chartInstance = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: selectedLabel,
-          data: data,
-          backgroundColor: colors,
-          borderRadius: 6,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: ctx => ctx.parsed.y.toFixed(1) + (indicator.includes('tasa') ? '' : '%') } }
-        },
-        scales: {
-          y: { beginAtZero: true, title: { display: true, text: '%' } },
-          x: { ticks: { font: { size: 9 } } }
+    // ================================================================
+    // FUNCIONES DE SEGURIDAD PARA GRÁFICOS
+    // ================================================================
+    function safeDestroy(chartVar) {
+        if (chartVar && typeof chartVar.destroy === 'function') {
+            chartVar.destroy();
         }
-      }
-    });
-  }
+        return null;
+    }
 
-  // ================================================================
-  // INICIALIZACIÓN
-  // ================================================================
-  document.addEventListener('DOMContentLoaded', function() {
-    cargarDashboard();
-  });
+    // ================================================================
+    // OBTENER DATOS DE TODAS LAS SALAS (CON NORMALIZACIÓN)
+    // ================================================================
+    async function getDataFromAllWards() {
+        const { data, error } = await supabaseClient
+            .from("REGISTROS")
+            .select("*")
+            .order("date", { ascending: true });
+        if (error) { console.error(error); return []; }
+        return data
+            .filter(row => {
+                const w = row.ward || '';
+                return !EXCLUDED_WARDS.includes(w) && w !== '';
+            })
+            .map(row => {
+                const d = row.data;
+                if (d.ward) {
+                    // Normalizar nombre de sala (sin tilde)
+                    d.ward = normalizarNombreSala(d.ward);
+                }
+                return d;
+            });
+    }
+
+    function getWardsAndMonths(records) {
+        const wards = new Set();
+        const months = new Set();
+        records.forEach(r => {
+            if (r.ward) wards.add(r.ward);
+            if (r.date) months.add(r.date.substring(0, 7));
+        });
+        return { wards: Array.from(wards).sort(), months: Array.from(months).sort() };
+    }
+
+    function filterRecordsByMonth(records, month) {
+        return records.filter(r => r.date && r.date.substring(0, 7) === month);
+    }
+
+    // ================================================================
+    // DETECCIÓN DE TIPO DE SALA SEGÚN CAMPOS PRESENTES
+    // ================================================================
+    function detectarTipoSala(sum) {
+        if (sum.patientsAttendedDay !== undefined) return 'emergencia';
+        if (sum.registrosCompletos !== undefined && sum.surgeryDone !== undefined) return 'centro_quirurgico';
+        if (sum.surgeryDone !== undefined) return 'quirurgica';
+        if (sum.hoursNursing !== undefined) return 'uci';
+        if (sum.wellsApplied !== undefined) return 'la_virgen';
+        if (sum.aspirationEvent !== undefined) return 'santa_ana';
+        if (sum.aspirationRisk !== undefined) return 'jesus_maria';
+        return 'comun';
+    }
+
+    // ================================================================
+    // CÁLCULO DE INDICADORES DE UNA SALA (COMPLETO)
+    // ================================================================
+    function calcularIndicadoresSala(records, sala) {
+        const salaNorm = sala.trim();
+        const salaRecords = records.filter(r => r.ward && r.ward === salaNorm);
+        if (salaRecords.length === 0) return {};
+
+        const sum = {};
+        salaRecords.forEach(r => {
+            for (const key in r) {
+                if (typeof r[key] === 'number' && key !== 'totalPatients') {
+                    if (!sum[key]) sum[key] = 0;
+                    sum[key] += r[key];
+                }
+            }
+            if (r.extra) {
+                for (const key in r.extra) {
+                    if (typeof r.extra[key] === 'number') {
+                        if (!sum[key]) sum[key] = 0;
+                        sum[key] += r.extra[key];
+                    }
+                }
+            }
+        });
+
+        const totalPatients = sum.totalPatients || 0;
+        const admissions = sum.admissions || 0;
+        const lppEvaluated = sum.lppEvaluated || 0;
+        const cvpTotal = sum.cvpTotal || 0;
+        const glasgowExpected = sum.consciousnessExpected || 0;
+
+        const indicadores = {};
+
+        // DETECTAR TIPO DE SALA
+        const tipo = detectarTipoSala(sum);
+
+        // 1. INDICADORES COMUNES (si la sala los tiene)
+        if (tipo !== 'emergencia' && tipo !== 'centro_quirurgico') {
+            const comunes = [
+                { key: 'coberturaLPP', label: 'Cobertura LPP', num: lppEvaluated, den: admissions, fmt: 'percent' },
+                { key: 'incidenciaLPP', label: 'Incidencia LPP', num: sum.lppIncidence || 0, den: totalPatients, fmt: 'percent' },
+                { key: 'tasaEA', label: 'Tasa EA (x1000)', num: sum.adverseEvents || 0, den: totalPatients, fmt: 'rate' },
+                { key: 'tasaCaidas', label: 'Tasa Caídas (x1000)', num: sum.falls || 0, den: totalPatients, fmt: 'rate' },
+                { key: 'cumplimientoCVC', label: 'Cumpl. CVC', num: sum.cvcDone || 0, den: sum.cvcTotal || 0, fmt: 'percent' },
+                { key: 'cumplimientoVM', label: 'Cumpl. VM', num: sum.vmDone || 0, den: sum.vmTotal || 0, fmt: 'percent' },
+                { key: 'cumplimientoCUP', label: 'Cumpl. CUP', num: sum.cupDone || 0, den: sum.cupTotal || 0, fmt: 'percent' },
+                { key: 'incidenciaFlebitis', label: 'Flebitis (CVP)', num: sum.phlebitis || 0, den: cvpTotal, fmt: 'percent' },
+                { key: 'cumplimientoPAE', label: 'Cumpl. PAE', num: (sum.paeDay || 0) + (sum.paeNight || 0), den: sum.paeTotal || 0, fmt: 'percent' },
+                { key: 'cumplimientoGlasgow', label: 'Cumpl. Glasgow', num: (sum.consciousnessDay || 0) + (sum.consciousnessNight || 0), den: glasgowExpected, fmt: 'percent' },
+            ];
+            comunes.forEach(ind => {
+                let result = 0;
+                if (ind.den > 0) {
+                    if (ind.fmt === 'percent') result = (ind.num / ind.den) * 100;
+                    else if (ind.fmt === 'rate') result = (ind.num / ind.den) * 1000;
+                    else result = ind.num / ind.den;
+                }
+                indicadores[ind.key] = { label: ind.label, numerator: ind.num, denominator: ind.den, result, format: ind.fmt };
+            });
+        }
+
+        // 2. INDICADORES ESPECÍFICOS (sin cambios)
+        if (tipo === 'santa_ana' || tipo === 'jesus_maria') {
+            const riskNum = sum.aspirationEvent !== undefined ? sum.aspirationEvent : (sum.aspirationRisk || 0);
+            const riskDen = sum.aspirationRiskDen !== undefined ? sum.aspirationRiskDen : (sum.aspirationTotal || 0);
+            indicadores['aspirationIncidence'] = {
+                label: 'Incidencia de aspiración en pacientes con riesgo',
+                numerator: riskNum,
+                denominator: riskDen,
+                result: riskDen > 0 ? (riskNum / riskDen * 100) : 0,
+                format: 'percent'
+            };
+        }
+
+        if (tipo === 'la_virgen') {
+            const wellsNum = sum.wellsApplied || 0;
+            const wellsDen = sum.wellsTotal || 0;
+            const dysNum = sum.dysphagiaApplied || 0;
+            const dysDen = sum.dysphagiaTotal || 0;
+            indicadores['wells'] = {
+                label: 'Evaluación Wells (TVP)',
+                numerator: wellsNum,
+                denominator: wellsDen,
+                result: wellsDen > 0 ? (wellsNum / wellsDen * 100) : 0,
+                format: 'percent'
+            };
+            indicadores['dysphagia'] = {
+                label: 'Test de Disfagia',
+                numerator: dysNum,
+                denominator: dysDen,
+                result: dysDen > 0 ? (dysNum / dysDen * 100) : 0,
+                format: 'percent'
+            };
+        }
+
+        if (tipo === 'quirurgica' || tipo === 'centro_quirurgico') {
+            const surgNum = sum.surgeryDone || 0;
+            const surgDen = sum.surgeryTotal || 0;
+            indicadores['cirugias'] = {
+                label: 'Cumplimiento cirugías programadas',
+                numerator: surgNum,
+                denominator: surgDen,
+                result: surgDen > 0 ? (surgNum / surgDen * 100) : 0,
+                format: 'percent'
+            };
+        }
+
+        if (tipo === 'centro_quirurgico') {
+            const qxFields = [
+                { key: 'qxRegistros', label: 'Cumplimiento registros perioperatorios', num: sum.registrosCompletos || 0, den: sum.totalHistoriasAuditadas || 0, fmt: 'percent' },
+                { key: 'qxConteo', label: 'Cumplimiento conteo instrumental', num: sum.conteoCorrecto || 0, den: sum.totalCirugiasConteo || 0, fmt: 'percent' },
+                { key: 'qxHigiene', label: 'Cumplimiento higiene de manos', num: sum.higieneManosCorrecta || 0, den: sum.totalOportunidadesHigiene || 0, fmt: 'percent' },
+                { key: 'qxPosicion', label: 'Cumplimiento posicionamiento seguro', num: sum.posicionamientoCorrecto || 0, den: sum.totalPacientesPosicion || 0, fmt: 'percent' },
+                { key: 'qxLPP', label: 'Incidencia de LPP quirúrgicas', num: sum.lppQuirurgico || 0, den: sum.totalPacientesLPP || 0, fmt: 'percent' },
+                { key: 'qxLista', label: 'Cumplimiento Lista de Verificación', num: sum.listaVerificacionRegistrada || 0, den: sum.totalCirugiasLista || 0, fmt: 'percent' },
+                { key: 'qxIdentificacion', label: 'Cumplimiento identificación segura', num: sum.identificacionCorrecta || 0, den: sum.totalPacientesIdentificacion || 0, fmt: 'percent' },
+            ];
+            qxFields.forEach(ind => {
+                let result = 0;
+                if (ind.den > 0) {
+                    if (ind.fmt === 'percent') result = (ind.num / ind.den) * 100;
+                    else if (ind.fmt === 'rate') result = (ind.num / ind.den) * 1000;
+                    else if (ind.fmt === 'avg') result = ind.num / ind.den;
+                    else result = ind.num / ind.den;
+                }
+                indicadores[ind.key] = { label: ind.label, numerator: ind.num, denominator: ind.den, result, format: ind.fmt };
+            });
+        }
+
+        if (tipo === 'uci') {
+            const uciFields = [
+                { key: 'hoursNursing', label: 'Horas Enfermería (24h)', num: sum.hoursNursing || 0, den: sum.hoursNursingDen || 0, fmt: 'avg' },
+                { key: 'ratioDay', label: 'Ratio día', num: sum.patientsTurnDay || 0, den: sum.nursesDay || 0, fmt: 'avg' },
+                { key: 'ratioNight', label: 'Ratio noche', num: sum.patientsTurnNight || 0, den: sum.nursesNight || 0, fmt: 'avg' },
+                { key: 'vapRate', label: 'Tasa VAP (x1000)', num: sum.vapCases || 0, den: sum.vmDays || 0, fmt: 'rate' },
+                { key: 'sedationEval', label: 'Sedación evaluada', num: sum.sedationEvaluated || 0, den: sum.sedationTotal || 0, fmt: 'percent' },
+                { key: 'picReg', label: 'PIC vigilada', num: sum.picRegistered || 0, den: sum.picTotal || 0, fmt: 'percent' },
+                { key: 'retiroCvc', label: 'Retiro CVC/CVP', num: sum.raCvc || 0, den: sum.pacCvc || 0, fmt: 'percent' },
+                { key: 'retiroTet', label: 'Retiro TET', num: sum.raTet || 0, den: sum.pacTet || 0, fmt: 'percent' },
+                { key: 'retiroSng', label: 'Retiro SNG/SOG', num: sum.raSng || 0, den: sum.pacSng || 0, fmt: 'percent' },
+                { key: 'retiroCup', label: 'Retiro CUP', num: sum.raCup || 0, den: sum.pacCup || 0, fmt: 'percent' },
+                { key: 'surveySat', label: 'Encuestas satisfactorias', num: sum.surveySatisfied || 0, den: sum.surveyApplied || 0, fmt: 'percent' },
+            ];
+            uciFields.forEach(ind => {
+                let result = 0;
+                if (ind.den > 0) {
+                    if (ind.fmt === 'percent') result = (ind.num / ind.den) * 100;
+                    else if (ind.fmt === 'rate') result = (ind.num / ind.den) * 1000;
+                    else if (ind.fmt === 'avg') result = ind.num / ind.den;
+                    else result = ind.num / ind.den;
+                }
+                indicadores[ind.key] = { label: ind.label, numerator: ind.num, denominator: ind.den, result, format: ind.fmt };
+            });
+        }
+
+        if (tipo === 'emergencia') {
+            const totalPacientesTurno = (sum.patientsAttendedDay || 0) + (sum.patientsAttendedNight || 0);
+            const totalEnfermerasTurno = (sum.nursesScheduledDay || 0) + (sum.nursesScheduledNight || 0);
+            const emerFields = [
+                { key: 'emerRelGlobal', label: 'Relación Pac/Enf (global)', num: totalPacientesTurno, den: totalEnfermerasTurno, fmt: 'ratio' },
+                { key: 'emerRelDia', label: 'Relación Pac/Enf (DÍA)', num: sum.patientsAttendedDay || 0, den: sum.nursesScheduledDay || 0, fmt: 'ratio' },
+                { key: 'emerRelNoche', label: 'Relación Pac/Enf (NOCHE)', num: sum.patientsAttendedNight || 0, den: sum.nursesScheduledNight || 0, fmt: 'ratio' },
+                { key: 'emerGlasgow', label: 'Cumplimiento Glasgow', num: sum.glasgowComplete || 0, den: sum.glasgowTotal || 0, fmt: 'percent' },
+                { key: 'emerTriage', label: 'Tiempo Triaje (min)', num: sum.timeTriageSum || 0, den: sum.patientsTriaged || 0, fmt: 'avg' },
+                { key: 'emerThrombo', label: 'Tiempo Trombólisis (min)', num: sum.timeThrombolysisSum || 0, den: sum.thrombolysedPatients || 0, fmt: 'avg' },
+                { key: 'emerFalls', label: 'Incidencia Caídas', num: sum.emergencyFalls || 0, den: sum.emergencyTotalPatients || 0, fmt: 'percent' },
+                { key: 'emerPAE', label: 'Cumplimiento PAE', num: (sum.paeDay || 0) + (sum.paeNight || 0), den: sum.paeTotal || 0, fmt: 'percent' },
+                { key: 'emerObs', label: 'Tiempo Observación (min)', num: sum.obsStaySum || 0, den: sum.obsPatients || 0, fmt: 'avg' },
+                { key: 'emerAspiration', label: 'Riesgo de Aspiración', num: sum.aspirationRisk || 0, den: sum.aspirationTotal || 0, fmt: 'percent' },
+                { key: 'emerConciencia', label: 'Evaluación Conciencia', num: sum.consciousness || 0, den: sum.emergencyTotalPatients || 0, fmt: 'percent' },
+            ];
+            emerFields.forEach(ind => {
+                let result = 0;
+                if (ind.den > 0) {
+                    if (ind.fmt === 'percent') result = (ind.num / ind.den) * 100;
+                    else if (ind.fmt === 'ratio') result = ind.num / ind.den;
+                    else if (ind.fmt === 'avg') result = ind.num / ind.den;
+                    else result = ind.num / ind.den;
+                }
+                indicadores[ind.key] = { label: ind.label, numerator: ind.num, denominator: ind.den, result, format: ind.fmt };
+            });
+        }
+
+        return indicadores;
+    }
+
+    // ================================================================
+    // CONSOLIDAR INDICADORES PARA "TODAS" (SOLO COMUNES)
+    // ================================================================
+    function consolidarIndicadores(records) {
+        const sum = {};
+        records.forEach(r => {
+            for (const key in r) {
+                if (typeof r[key] === 'number' && key !== 'totalPatients') {
+                    if (!sum[key]) sum[key] = 0;
+                    sum[key] += r[key];
+                }
+            }
+            if (r.extra) {
+                for (const key in r.extra) {
+                    if (typeof r.extra[key] === 'number') {
+                        if (!sum[key]) sum[key] = 0;
+                        sum[key] += r.extra[key];
+                    }
+                }
+            }
+        });
+        const totalPatients = sum.totalPatients || 0;
+        const admissions = sum.admissions || 0;
+        const lppEvaluated = sum.lppEvaluated || 0;
+        const cvpTotal = sum.cvpTotal || 0;
+        const glasgowExpected = sum.consciousnessExpected || 0;
+        const indicadores = {};
+        const comunes = [
+            { key: 'coberturaLPP', label: 'Cobertura LPP', num: lppEvaluated, den: admissions, fmt: 'percent' },
+            { key: 'incidenciaLPP', label: 'Incidencia LPP', num: sum.lppIncidence || 0, den: totalPatients, fmt: 'percent' },
+            { key: 'tasaEA', label: 'Tasa EA (x1000)', num: sum.adverseEvents || 0, den: totalPatients, fmt: 'rate' },
+            { key: 'tasaCaidas', label: 'Tasa Caídas (x1000)', num: sum.falls || 0, den: totalPatients, fmt: 'rate' },
+            { key: 'cumplimientoCVC', label: 'Cumpl. CVC', num: sum.cvcDone || 0, den: sum.cvcTotal || 0, fmt: 'percent' },
+            { key: 'cumplimientoVM', label: 'Cumpl. VM', num: sum.vmDone || 0, den: sum.vmTotal || 0, fmt: 'percent' },
+            { key: 'cumplimientoCUP', label: 'Cumpl. CUP', num: sum.cupDone || 0, den: sum.cupTotal || 0, fmt: 'percent' },
+            { key: 'incidenciaFlebitis', label: 'Flebitis (CVP)', num: sum.phlebitis || 0, den: cvpTotal, fmt: 'percent' },
+            { key: 'cumplimientoPAE', label: 'Cumpl. PAE', num: (sum.paeDay || 0) + (sum.paeNight || 0), den: sum.paeTotal || 0, fmt: 'percent' },
+            { key: 'cumplimientoGlasgow', label: 'Cumpl. Glasgow', num: (sum.consciousnessDay || 0) + (sum.consciousnessNight || 0), den: glasgowExpected, fmt: 'percent' },
+        ];
+        comunes.forEach(ind => {
+            let result = 0;
+            if (ind.den > 0) {
+                if (ind.fmt === 'percent') result = (ind.num / ind.den) * 100;
+                else if (ind.fmt === 'rate') result = (ind.num / ind.den) * 1000;
+                else result = ind.num / ind.den;
+            }
+            indicadores[ind.key] = { label: ind.label, numerator: ind.num, denominator: ind.den, result, format: ind.fmt };
+        });
+        return indicadores;
+    }
+
+    // ================================================================
+    // OBTENER INDICADORES DISPONIBLES PARA COMPARATIVA
+    // ================================================================
+    function getAvailableIndicators(records, salaSeleccionada) {
+        const map = new Map();
+        const processIndicators = (inds) => {
+            for (const key in inds) {
+                if (!map.has(key)) {
+                    map.set(key, { key: key, label: inds[key].label.trim() });
+                }
+            }
+        };
+        if (salaSeleccionada === 'Todas') {
+            const wards = getWardsAndMonths(records).wards;
+            wards.forEach(ward => {
+                const inds = calcularIndicadoresSala(records, ward);
+                processIndicators(inds);
+            });
+        } else {
+            const inds = calcularIndicadoresSala(records, salaSeleccionada);
+            processIndicators(inds);
+        }
+        const result = Array.from(map.values());
+        result.sort((a, b) => a.label.localeCompare(b.label));
+        return result;
+    }
+
+    // ================================================================
+    // RENDER DASHBOARD GENERAL
+    // ================================================================
+    async function renderDashboard() {
+        const container = document.getElementById('dashboardContent');
+        const allRecords = await getDataFromAllWards();
+        if (allRecords.length === 0) {
+            container.innerHTML = `<div class="alert alert-warning">No hay registros en ninguna sala.</div>`;
+            return;
+        }
+        const { wards, months } = getWardsAndMonths(allRecords);
+
+        const salaSelect = document.createElement('select');
+        salaSelect.id = 'salaSelector';
+        salaSelect.className = 'form-select me-2';
+        salaSelect.style.width = 'auto';
+        salaSelect.style.display = 'inline-block';
+        salaSelect.innerHTML = `<option value="Todas">🌐 Todas las salas</option>`;
+        wards.forEach(w => { salaSelect.innerHTML += `<option value="${w}">${w}</option>`; });
+
+        const mesSelect = document.createElement('select');
+        mesSelect.id = 'mesSelector';
+        mesSelect.className = 'form-select me-2';
+        mesSelect.style.width = 'auto';
+        mesSelect.style.display = 'inline-block';
+        const names = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
+        months.forEach(m => {
+            const [y, mo] = m.split('-');
+            mesSelect.innerHTML += `<option value="${m}">${names[parseInt(mo)-1]} ${y}</option>`;
+        });
+        if (months.length > 0) mesSelect.value = months[months.length - 1];
+
+        const filtersDiv = document.createElement('div');
+        filtersDiv.className = 'filters-bar d-flex flex-wrap align-items-center gap-3';
+        filtersDiv.innerHTML = `
+            <label class="fw-bold me-1"><i class="fas fa-hospital"></i> Sala:</label>
+            <span id="salaSelectContainer"></span>
+            <label class="fw-bold me-1"><i class="fas fa-calendar-alt"></i> Mes:</label>
+            <span id="mesSelectContainer"></span>
+            <button id="btnActualizar" class="btn btn-primary btn-sm"><i class="fas fa-sync me-1"></i> Actualizar</button>
+        `;
+        container.innerHTML = '';
+        container.appendChild(filtersDiv);
+        document.getElementById('salaSelectContainer').appendChild(salaSelect);
+        document.getElementById('mesSelectContainer').appendChild(mesSelect);
+
+        const inner = document.createElement('div');
+        inner.id = 'dashboardContentInner';
+        container.appendChild(inner);
+
+        function updateDashboard() {
+            const sala = salaSelect.value;
+            const mes = mesSelect.value;
+            const filtered = filterRecordsByMonth(allRecords, mes);
+            let indicadores = {};
+            if (sala === 'Todas') {
+                indicadores = consolidarIndicadores(filtered);
+            } else {
+                indicadores = calcularIndicadoresSala(filtered, sala);
+            }
+
+            let html = '';
+
+            const kpis = [];
+            const orden = ['coberturaLPP', 'incidenciaLPP', 'tasaEA', 'tasaCaidas', 'cumplimientoCVC', 'cumplimientoVM', 'cumplimientoCUP', 'incidenciaFlebitis', 'cumplimientoPAE', 'cumplimientoGlasgow'];
+            orden.forEach(key => {
+                if (indicadores[key]) {
+                    const ind = indicadores[key];
+                    let unit = ind.format === 'percent' ? '%' : (ind.format === 'rate' ? '' : '');
+                    kpis.push({ label: ind.label, value: ind.result, unit: unit, den: ind.denominator });
+                }
+            });
+            for (const key in indicadores) {
+                if (!orden.includes(key)) {
+                    const ind = indicadores[key];
+                    let unit = ind.format === 'percent' ? '%' : (ind.format === 'rate' ? '' : (ind.format === 'avg' ? '' : ''));
+                    kpis.push({ label: ind.label, value: ind.result, unit: unit, den: ind.denominator });
+                }
+            }
+
+            html += `<div class="row g-3 mb-4">`;
+            kpis.forEach(k => {
+                const val = typeof k.value === 'number' ? k.value.toFixed(1) : '0.0';
+                const sem = obtenerSemaforo(k.label, k.value, k.den || 0);
+                html += `<div class="col-md-3"><div class="kpi-card" style="border-left-color: ${sem.color === 'status-green' ? '#28a745' : sem.color === 'status-yellow' ? '#ffc107' : sem.color === 'status-red' ? '#dc3545' : '#6c757d'};">
+                    <div class="kpi-label">${k.label}</div>
+                    <div class="kpi-value">${val}<span class="kpi-unit">${k.unit}</span></div>
+                    <small class="${sem.color} sem-foro-texto">${sem.texto}</small>
+                </div></div>`;
+            });
+            html += `</div>`;
+
+            const chartLabels = [];
+            const chartData = [];
+            const chartColors = ['#0a3d62','#e74c3c','#8e44ad','#1abc9c','#3498db','#e84393','#28a745','#f39c12','#6f42c1','#fd7e14','#20c997','#e83e8c','#0d6efd','#6610f2','#d63384','#dc3545','#198754','#ffc107','#17a2b8'];
+            for (const key in indicadores) {
+                const ind = indicadores[key];
+                chartLabels.push(ind.label);
+                chartData.push(ind.result);
+            }
+
+            html += `<div class="row"><div class="col-md-12"><div class="chart-container"><canvas id="chartIndicadores"></canvas></div></div></div>`;
+
+            html += `<div class="card mt-4">
+                <div class="card-header"><i class="fas fa-table me-2"></i>Detalle de indicadores - ${sala === 'Todas' ? 'Todas las salas' : sala} (${mes})</div>
+                <div class="card-body">
+                    <div class="table-responsive"><table class="table table-bordered table-striped indicador-tabla">
+                        <thead><tr><th>Indicador</th><th>Numerador</th><th>Denominador</th><th>Resultado</th><th>Estado</th></tr></thead><tbody>`;
+            for (const key in indicadores) {
+                const ind = indicadores[key];
+                let resultado = '—';
+                if (ind.denominator === 0) {
+                    resultado = '—';
+                } else if (ind.format === 'percent') {
+                    resultado = ind.result.toFixed(1) + '%';
+                } else if (ind.format === 'rate') {
+                    resultado = ind.result.toFixed(1);
+                } else if (ind.format === 'avg') {
+                    resultado = ind.result.toFixed(1);
+                } else if (ind.format === 'ratio') {
+                    resultado = ind.result.toFixed(1) + ':1';
+                } else {
+                    resultado = ind.result.toFixed(1);
+                }
+                const sem = obtenerSemaforo(ind.label, ind.result, ind.denominator);
+                html += `<tr class="${sem.color}">
+                    <td><strong>${ind.label}</strong></td>
+                    <td>${ind.numerator}</td>
+                    <td>${ind.denominator}</td>
+                    <td>${resultado}</td>
+                    <td>${sem.texto}</td>
+                </tr>`;
+            }
+            html += `</tbody></table></div></div></div>`;
+
+            inner.innerHTML = html;
+
+            setTimeout(() => {
+                const ctx = document.getElementById('chartIndicadores');
+                if (ctx) {
+                    window.chartIndicadores = safeDestroy(window.chartIndicadores);
+                    try {
+                        window.chartIndicadores = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: chartLabels,
+                                datasets: [{
+                                    label: sala === 'Todas' ? 'Todas las salas' : sala,
+                                    data: chartData,
+                                    backgroundColor: chartColors.slice(0, chartLabels.length),
+                                    borderRadius: 6,
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y.toFixed(1) } } },
+                                scales: { y: { beginAtZero: true, title: { display: true, text: 'Valor' } } }
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('Error al crear gráfico:', e);
+                    }
+                }
+            }, 400);
+        }
+
+        salaSelect.addEventListener('change', updateDashboard);
+        mesSelect.addEventListener('change', updateDashboard);
+        document.getElementById('btnActualizar').addEventListener('click', updateDashboard);
+        updateDashboard();
+    }
+
+    // ================================================================
+    // RENDER COMPARATIVA POR SALA
+    // ================================================================
+    async function renderComparativa() {
+        const container = document.getElementById('comparativaContent');
+        const allRecords = await getDataFromAllWards();
+        if (allRecords.length === 0) {
+            container.innerHTML = `<div class="alert alert-warning">No hay registros en ninguna sala.</div>`;
+            return;
+        }
+        const { wards, months } = getWardsAndMonths(allRecords);
+
+        const mesSelect = document.createElement('select');
+        mesSelect.id = 'mesComparativa';
+        mesSelect.className = 'form-select me-2';
+        mesSelect.style.width = 'auto';
+        mesSelect.style.display = 'inline-block';
+        const names = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
+        months.forEach(m => {
+            const [y, mo] = m.split('-');
+            mesSelect.innerHTML += `<option value="${m}">${names[parseInt(mo)-1]} ${y}</option>`;
+        });
+        if (months.length > 0) mesSelect.value = months[months.length - 1];
+
+        const salaBaseSelect = document.createElement('select');
+        salaBaseSelect.id = 'salaBaseComparativa';
+        salaBaseSelect.className = 'form-select me-2';
+        salaBaseSelect.style.width = 'auto';
+        salaBaseSelect.style.display = 'inline-block';
+        salaBaseSelect.innerHTML = `<option value="Todas">🌐 Todas</option>`;
+        wards.forEach(w => { salaBaseSelect.innerHTML += `<option value="${w}">${w}</option>`; });
+
+        const indicadorSelect = document.createElement('select');
+        indicadorSelect.id = 'indicadorComparativa';
+        indicadorSelect.className = 'form-select me-2';
+        indicadorSelect.style.width = 'auto';
+        indicadorSelect.style.display = 'inline-block';
+        indicadorSelect.innerHTML = `<option value="">-- Selecciona un indicador --</option>`;
+
+        const filtersDiv = document.createElement('div');
+        filtersDiv.className = 'filters-bar d-flex flex-wrap align-items-center gap-3';
+        filtersDiv.innerHTML = `
+            <label class="fw-bold me-1"><i class="fas fa-calendar-alt"></i> Mes:</label>
+            <span id="mesComparativaContainer"></span>
+            <label class="fw-bold me-1"><i class="fas fa-hospital"></i> Sala base:</label>
+            <span id="salaBaseComparativaContainer"></span>
+            <label class="fw-bold me-1"><i class="fas fa-chart-simple"></i> Indicador:</label>
+            <span id="indicadorComparativaContainer"></span>
+            <button id="btnActualizarComparativa" class="btn btn-primary btn-sm"><i class="fas fa-sync me-1"></i> Actualizar</button>
+        `;
+        container.innerHTML = '';
+        container.appendChild(filtersDiv);
+        document.getElementById('mesComparativaContainer').appendChild(mesSelect);
+        document.getElementById('salaBaseComparativaContainer').appendChild(salaBaseSelect);
+        document.getElementById('indicadorComparativaContainer').appendChild(indicadorSelect);
+
+        const inner = document.createElement('div');
+        inner.id = 'comparativaInner';
+        container.appendChild(inner);
+
+        function updateIndicadorOptions() {
+            const mes = mesSelect.value;
+            const salaBase = salaBaseSelect.value;
+            const filtered = filterRecordsByMonth(allRecords, mes);
+            const available = getAvailableIndicators(filtered, salaBase);
+            const current = indicadorSelect.value;
+            indicadorSelect.innerHTML = `<option value="">-- Selecciona un indicador --</option>`;
+            available.forEach(item => {
+                indicadorSelect.innerHTML += `<option value="${item.key}">${item.label}</option>`;
+            });
+            if (current && Array.from(indicadorSelect.options).some(o => o.value === current)) {
+                indicadorSelect.value = current;
+            }
+            if (!indicadorSelect.value && indicadorSelect.options.length > 1) {
+                indicadorSelect.value = indicadorSelect.options[1].value;
+            }
+        }
+
+        function updateComparativa() {
+            const mes = mesSelect.value;
+            const indicatorKey = indicadorSelect.value;
+            if (!indicatorKey) {
+                inner.innerHTML = `<div class="alert alert-info">Selecciona un indicador para ver la comparativa.</div>`;
+                return;
+            }
+
+            const filtered = filterRecordsByMonth(allRecords, mes);
+            const wardsList = getWardsAndMonths(allRecords).wards;
+
+            const data = [];
+            wardsList.forEach(ward => {
+                const inds = calcularIndicadoresSala(filtered, ward);
+                if (inds[indicatorKey]) {
+                    const ind = inds[indicatorKey];
+                    data.push({
+                        ward: ward,
+                        label: ind.label || indicatorKey,
+                        value: ind.result,
+                        numerator: ind.numerator,
+                        denominator: ind.denominator,
+                        format: ind.format
+                    });
+                } else {
+                    data.push({
+                        ward: ward,
+                        label: indicatorKey,
+                        value: 0,
+                        numerator: 0,
+                        denominator: 0,
+                        format: 'percent'
+                    });
+                }
+            });
+
+            data.sort((a, b) => b.value - a.value);
+
+            let indicatorLabel = indicatorKey;
+            let realFormat = 'percent';
+            for (const item of data) {
+                if (item.label !== indicatorKey) {
+                    indicatorLabel = item.label;
+                }
+                if (item.format) realFormat = item.format;
+                break;
+            }
+
+            let html = `
+                <div class="comparativa-card">
+                    <div class="card-header">
+                        <i class="fas fa-arrow-right-arrow-left me-2"></i> Comparativa por Sala - <strong>${indicatorLabel}</strong> (${mes})
+                    </div>
+                    <div class="mt-3">
+                        <div class="chart-container-comparativa">
+                            <canvas id="chartComparativa"></canvas>
+                        </div>
+                    </div>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-bordered table-striped indicador-tabla">
+                            <thead>
+                                <tr>
+                                    <th>Sala</th>
+                                    <th>Valor</th>
+                                    <th>Numerador</th>
+                                    <th>Denominador</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+            data.forEach(item => {
+                let resultado = '—';
+                if (item.denominator === 0) {
+                    resultado = '—';
+                } else if (realFormat === 'percent') {
+                    resultado = item.value.toFixed(1) + '%';
+                } else if (realFormat === 'rate') {
+                    resultado = item.value.toFixed(1);
+                } else if (realFormat === 'avg') {
+                    resultado = item.value.toFixed(1);
+                } else if (realFormat === 'ratio') {
+                    resultado = item.value.toFixed(1) + ':1';
+                } else {
+                    resultado = item.value.toFixed(1);
+                }
+                let sem = obtenerSemaforo(indicatorLabel, item.value, item.denominator);
+                if (item.denominator === 0) sem = { color: 'status-neutral', texto: 'N/A' };
+                html += `<tr class="${sem.color}">
+                    <td><strong>${item.ward}</strong></td>
+                    <td>${resultado}</td>
+                    <td>${item.numerator}</td>
+                    <td>${item.denominator}</td>
+                    <td>${sem.texto}</td>
+                </tr>`;
+            });
+            html += `</tbody></table></div></div>`;
+
+            inner.innerHTML = html;
+
+            setTimeout(() => {
+                const ctx = document.getElementById('chartComparativa');
+                if (ctx) {
+                    window.chartComparativa = safeDestroy(window.chartComparativa);
+                    try {
+                        const labels = data.map(d => d.ward);
+                        const values = data.map(d => d.value);
+                        const colors = values.map(v => {
+                            const sem = obtenerSemaforo(indicatorLabel, v, 1);
+                            if (sem.color === 'status-green') return '#28a745';
+                            if (sem.color === 'status-yellow') return '#ffc107';
+                            if (sem.color === 'status-red') return '#dc3545';
+                            return '#6c757d';
+                        });
+                        window.chartComparativa = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: indicatorLabel,
+                                    data: values,
+                                    backgroundColor: colors,
+                                    borderRadius: 6,
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    y: { beginAtZero: true, title: { display: true, text: realFormat === 'percent' ? '%' : 'Valor' } },
+                                    x: { grid: { display: false } }
+                                }
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('Error al crear gráfico comparativo:', e);
+                    }
+                }
+            }, 400);
+        }
+
+        salaBaseSelect.addEventListener('change', function() {
+            updateIndicadorOptions();
+            setTimeout(updateComparativa, 300);
+        });
+        mesSelect.addEventListener('change', function() {
+            updateIndicadorOptions();
+            setTimeout(updateComparativa, 300);
+        });
+        indicadorSelect.addEventListener('change', updateComparativa);
+        document.getElementById('btnActualizarComparativa').addEventListener('click', function() {
+            updateIndicadorOptions();
+            setTimeout(updateComparativa, 300);
+        });
+
+        updateIndicadorOptions();
+        setTimeout(updateComparativa, 400);
+    }
+
+    // ================================================================
+    // RENDER REPORTE TRIMESTRAL
+    // ================================================================
+    async function renderReport() {
+        const container = document.getElementById('reportContent');
+        const allRecords = await getDataFromAllWards();
+        if (allRecords.length === 0) {
+            container.innerHTML = `<div class="alert alert-warning">No hay registros en ninguna sala.</div>`;
+            return;
+        }
+        const { wards } = getWardsAndMonths(allRecords);
+
+        const salaSelect = document.createElement('select');
+        salaSelect.id = 'salaSelectReport';
+        salaSelect.className = 'form-select me-2';
+        salaSelect.style.width = 'auto';
+        salaSelect.style.display = 'inline-block';
+        salaSelect.innerHTML = `<option value="Todas">🌐 Todas las salas</option>`;
+        wards.forEach(w => { salaSelect.innerHTML += `<option value="${w}">${w}</option>`; });
+
+        const filtersDiv = document.createElement('div');
+        filtersDiv.className = 'filters-bar d-flex flex-wrap align-items-center gap-3';
+        filtersDiv.innerHTML = `
+            <label class="fw-bold me-1"><i class="fas fa-hospital"></i> Sala:</label>
+            <span id="salaSelectReportContainer"></span>
+            <button id="btnActualizarReport" class="btn btn-primary btn-sm"><i class="fas fa-sync me-1"></i> Actualizar</button>
+        `;
+        container.innerHTML = '';
+        container.appendChild(filtersDiv);
+        document.getElementById('salaSelectReportContainer').appendChild(salaSelect);
+
+        const inner = document.createElement('div');
+        inner.id = 'reportContentInner';
+        container.appendChild(inner);
+
+        function updateReport() {
+            const sala = salaSelect.value;
+            let records = allRecords;
+            if (sala !== 'Todas') {
+                records = allRecords.filter(r => r.ward && r.ward === sala);
+            }
+            if (records.length === 0) {
+                inner.innerHTML = `<div class="alert alert-warning">No hay registros para ${sala === 'Todas' ? 'todas las salas' : sala}.</div>`;
+                return;
+            }
+
+            function getQuarter(m) {
+                const mo = parseInt(m.split('-')[1]);
+                if (mo <= 3) return 'Trim I';
+                if (mo <= 6) return 'Trim II';
+                if (mo <= 9) return 'Trim III';
+                return 'Trim IV';
+            }
+
+            const quarters = {};
+            records.forEach(d => {
+                const key = d.date.substring(0, 7);
+                const q = getQuarter(key);
+                if (!quarters[q]) quarters[q] = [];
+                quarters[q].push(d);
+            });
+
+            const sortedQuarters = ['Trim I', 'Trim II', 'Trim III', 'Trim IV'];
+            const quarterData = {};
+            sortedQuarters.forEach(q => {
+                const recs = quarters[q] || [];
+                if (recs.length === 0) { quarterData[q] = null; return; }
+                const sum = {};
+                recs.forEach(r => {
+                    for (const key in r) {
+                        if (typeof r[key] === 'number' && key !== 'totalPatients') {
+                            if (!sum[key]) sum[key] = 0;
+                            sum[key] += r[key];
+                        }
+                    }
+                    if (r.extra) {
+                        for (const key in r.extra) {
+                            if (typeof r.extra[key] === 'number') {
+                                if (!sum[key]) sum[key] = 0;
+                                sum[key] += r.extra[key];
+                            }
+                        }
+                    }
+                });
+                const totalPatients = sum.totalPatients || 0;
+                const admissions = sum.admissions || 0;
+                const lppEvaluated = sum.lppEvaluated || 0;
+                const cvpTotal = sum.cvpTotal || 0;
+                const glasgowExpected = sum.consciousnessExpected || 0;
+
+                const ind = {
+                    totalPatients,
+                    coberturaLPP: admissions > 0 ? (lppEvaluated / admissions * 100) : 0,
+                    incidenciaLPP: totalPatients > 0 ? ((sum.lppIncidence || 0) / totalPatients * 100) : 0,
+                    tasaEA: totalPatients > 0 ? ((sum.adverseEvents || 0) / totalPatients * 1000) : 0,
+                    tasaCaidas: totalPatients > 0 ? ((sum.falls || 0) / totalPatients * 1000) : 0,
+                    cumplimientoCVC: (sum.cvcTotal || 0) > 0 ? ((sum.cvcDone || 0) / (sum.cvcTotal || 0) * 100) : 0,
+                    cumplimientoVM: (sum.vmTotal || 0) > 0 ? ((sum.vmDone || 0) / (sum.vmTotal || 0) * 100) : 0,
+                    cumplimientoCUP: (sum.cupTotal || 0) > 0 ? ((sum.cupDone || 0) / (sum.cupTotal || 0) * 100) : 0,
+                    incidenciaFlebitis: cvpTotal > 0 ? ((sum.phlebitis || 0) / cvpTotal * 100) : 0,
+                    cumplimientoPAE: (sum.paeTotal || 0) > 0 ? (((sum.paeDay || 0) + (sum.paeNight || 0)) / (sum.paeTotal || 0) * 100) : 0,
+                    cumplimientoGlasgow: glasgowExpected > 0 ? (((sum.consciousnessDay || 0) + (sum.consciousnessNight || 0)) / glasgowExpected * 100) : 0,
+                };
+
+                // Específicos según la sala (solo si no es "Todas")
+                if (sala !== 'Todas') {
+                    const tipo = detectarTipoSala(sum);
+                    if (tipo === 'santa_ana' || tipo === 'jesus_maria') {
+                        const riskNum = sum.aspirationEvent !== undefined ? sum.aspirationEvent : (sum.aspirationRisk || 0);
+                        const riskDen = sum.aspirationRiskDen !== undefined ? sum.aspirationRiskDen : (sum.aspirationTotal || 0);
+                        ind.aspirationIncidence = riskDen > 0 ? (riskNum / riskDen * 100) : 0;
+                    }
+                    if (tipo === 'la_virgen') {
+                        ind.wells = (sum.wellsTotal || 0) > 0 ? ((sum.wellsApplied || 0) / (sum.wellsTotal || 0) * 100) : 0;
+                        ind.dysphagia = (sum.dysphagiaTotal || 0) > 0 ? ((sum.dysphagiaApplied || 0) / (sum.dysphagiaTotal || 0) * 100) : 0;
+                    }
+                    if (tipo === 'quirurgica' || tipo === 'centro_quirurgico') {
+                        ind.cirugias = (sum.surgeryTotal || 0) > 0 ? ((sum.surgeryDone || 0) / (sum.surgeryTotal || 0) * 100) : 0;
+                    }
+                    if (tipo === 'centro_quirurgico') {
+                        ind.qxRegistros = (sum.totalHistoriasAuditadas || 0) > 0 ? ((sum.registrosCompletos || 0) / (sum.totalHistoriasAuditadas || 0) * 100) : 0;
+                        ind.qxConteo = (sum.totalCirugiasConteo || 0) > 0 ? ((sum.conteoCorrecto || 0) / (sum.totalCirugiasConteo || 0) * 100) : 0;
+                        ind.qxHigiene = (sum.totalOportunidadesHigiene || 0) > 0 ? ((sum.higieneManosCorrecta || 0) / (sum.totalOportunidadesHigiene || 0) * 100) : 0;
+                        ind.qxPosicion = (sum.totalPacientesPosicion || 0) > 0 ? ((sum.posicionamientoCorrecto || 0) / (sum.totalPacientesPosicion || 0) * 100) : 0;
+                        ind.qxLPP = (sum.totalPacientesLPP || 0) > 0 ? ((sum.lppQuirurgico || 0) / (sum.totalPacientesLPP || 0) * 100) : 0;
+                        ind.qxLista = (sum.totalCirugiasLista || 0) > 0 ? ((sum.listaVerificacionRegistrada || 0) / (sum.totalCirugiasLista || 0) * 100) : 0;
+                        ind.qxIdentificacion = (sum.totalPacientesIdentificacion || 0) > 0 ? ((sum.identificacionCorrecta || 0) / (sum.totalPacientesIdentificacion || 0) * 100) : 0;
+                    }
+                    if (tipo === 'uci') {
+                        ind.horasEnfermeria = (sum.hoursNursingDen || 0) > 0 ? ((sum.hoursNursing || 0) / (sum.hoursNursingDen || 0)) : 0;
+                        ind.ratioDay = (sum.nursesDay || 0) > 0 ? ((sum.patientsTurnDay || 0) / (sum.nursesDay || 0)) : 0;
+                        ind.ratioNight = (sum.nursesNight || 0) > 0 ? ((sum.patientsTurnNight || 0) / (sum.nursesNight || 0)) : 0;
+                        ind.tasaVAP = (sum.vmDays || 0) > 0 ? ((sum.vapCases || 0) / (sum.vmDays || 0) * 1000) : 0;
+                        ind.sedacion = (sum.sedationTotal || 0) > 0 ? ((sum.sedationEvaluated || 0) / (sum.sedationTotal || 0) * 100) : 0;
+                        ind.pic = (sum.picTotal || 0) > 0 ? ((sum.picRegistered || 0) / (sum.picTotal || 0) * 100) : 0;
+                        ind.retiroCvc = (sum.pacCvc || 0) > 0 ? ((sum.raCvc || 0) / (sum.pacCvc || 0) * 100) : 0;
+                        ind.retiroTet = (sum.pacTet || 0) > 0 ? ((sum.raTet || 0) / (sum.pacTet || 0) * 100) : 0;
+                        ind.retiroSng = (sum.pacSng || 0) > 0 ? ((sum.raSng || 0) / (sum.pacSng || 0) * 100) : 0;
+                        ind.retiroCup = (sum.pacCup || 0) > 0 ? ((sum.raCup || 0) / (sum.pacCup || 0) * 100) : 0;
+                        ind.encuestas = (sum.surveyApplied || 0) > 0 ? ((sum.surveySatisfied || 0) / (sum.surveyApplied || 0) * 100) : 0;
+                    }
+                    if (tipo === 'emergencia') {
+                        const totalPacientesTurno = (sum.patientsAttendedDay || 0) + (sum.patientsAttendedNight || 0);
+                        const totalEnfermerasTurno = (sum.nursesScheduledDay || 0) + (sum.nursesScheduledNight || 0);
+                        ind.emerRelGlobal = totalEnfermerasTurno > 0 ? (totalPacientesTurno / totalEnfermerasTurno) : 0;
+                        ind.emerRelDia = (sum.nursesScheduledDay || 0) > 0 ? ((sum.patientsAttendedDay || 0) / (sum.nursesScheduledDay || 0)) : 0;
+                        ind.emerRelNoche = (sum.nursesScheduledNight || 0) > 0 ? ((sum.patientsAttendedNight || 0) / (sum.nursesScheduledNight || 0)) : 0;
+                        ind.emerGlasgow = (sum.glasgowTotal || 0) > 0 ? ((sum.glasgowComplete || 0) / (sum.glasgowTotal || 0) * 100) : 0;
+                        ind.emerTriage = (sum.patientsTriaged || 0) > 0 ? ((sum.timeTriageSum || 0) / (sum.patientsTriaged || 0)) : 0;
+                        ind.emerThrombo = (sum.thrombolysedPatients || 0) > 0 ? ((sum.timeThrombolysisSum || 0) / (sum.thrombolysedPatients || 0)) : 0;
+                        ind.emerFalls = (sum.emergencyTotalPatients || 0) > 0 ? ((sum.emergencyFalls || 0) / (sum.emergencyTotalPatients || 0) * 100) : 0;
+                        ind.emerPAE = (sum.paeTotal || 0) > 0 ? (((sum.paeDay || 0) + (sum.paeNight || 0)) / (sum.paeTotal || 0) * 100) : 0;
+                        ind.emerObs = (sum.obsPatients || 0) > 0 ? ((sum.obsStaySum || 0) / (sum.obsPatients || 0)) : 0;
+                        ind.emerAspiration = (sum.aspirationTotal || 0) > 0 ? ((sum.aspirationRisk || 0) / (sum.aspirationTotal || 0) * 100) : 0;
+                        ind.emerConciencia = (sum.emergencyTotalPatients || 0) > 0 ? ((sum.consciousness || 0) / (sum.emergencyTotalPatients || 0) * 100) : 0;
+                    }
+                }
+                quarterData[q] = ind;
+            });
+
+            let html = `<h4>Reporte Trimestral - ${sala === 'Todas' ? 'Todas las salas' : sala}</h4>
+                <div class="table-responsive"><table class="table table-bordered table-striped table-indicators" id="quarterTable">
+                    <thead><tr><th>Indicador</th>${sortedQuarters.map(q => `<th>${q}</th>`).join('')}</tr></thead><tbody>`;
+
+            const rows = [
+                { label: 'Pacientes-día', key: 'totalPatients', fmt: v => v },
+                { label: 'Cobertura LPP', key: 'coberturaLPP', fmt: v => (v).toFixed(1)+'%' },
+                { label: 'Incidencia LPP', key: 'incidenciaLPP', fmt: v => (v).toFixed(1)+'%' },
+                { label: 'Tasa EA (x1000)', key: 'tasaEA', fmt: v => (v).toFixed(1) },
+                { label: 'Tasa Caídas (x1000)', key: 'tasaCaidas', fmt: v => (v).toFixed(1) },
+                { label: 'Cumpl. CVC', key: 'cumplimientoCVC', fmt: v => (v).toFixed(1)+'%' },
+                { label: 'Cumpl. VM', key: 'cumplimientoVM', fmt: v => (v).toFixed(1)+'%' },
+                { label: 'Cumpl. CUP', key: 'cumplimientoCUP', fmt: v => (v).toFixed(1)+'%' },
+                { label: 'Flebitis (CVP)', key: 'incidenciaFlebitis', fmt: v => (v).toFixed(1)+'%' },
+                { label: 'Cumpl. PAE', key: 'cumplimientoPAE', fmt: v => (v).toFixed(1)+'%' },
+                { label: 'Cumpl. Glasgow', key: 'cumplimientoGlasgow', fmt: v => (v).toFixed(1)+'%' },
+            ];
+
+            if (sala !== 'Todas') {
+                const sumTemp = {};
+                records.forEach(r => {
+                    for (const key in r) {
+                        if (typeof r[key] === 'number' && key !== 'totalPatients') {
+                            if (!sumTemp[key]) sumTemp[key] = 0;
+                            sumTemp[key] += r[key];
+                        }
+                    }
+                    if (r.extra) {
+                        for (const key in r.extra) {
+                            if (typeof r.extra[key] === 'number') {
+                                if (!sumTemp[key]) sumTemp[key] = 0;
+                                sumTemp[key] += r.extra[key];
+                            }
+                        }
+                    }
+                });
+                const tipoReal = detectarTipoSala(sumTemp);
+                if (tipoReal === 'santa_ana' || tipoReal === 'jesus_maria') {
+                    rows.push({ label: 'Incidencia de aspiración en pacientes con riesgo', key: 'aspirationIncidence', fmt: v => (v).toFixed(1)+'%' });
+                }
+                if (tipoReal === 'la_virgen') {
+                    rows.push({ label: 'Evaluación Wells (TVP)', key: 'wells', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Test de Disfagia', key: 'dysphagia', fmt: v => (v).toFixed(1)+'%' });
+                }
+                if (tipoReal === 'quirurgica' || tipoReal === 'centro_quirurgico') {
+                    rows.push({ label: 'Cumpl. cirugías programadas', key: 'cirugias', fmt: v => (v).toFixed(1)+'%' });
+                }
+                if (tipoReal === 'centro_quirurgico') {
+                    rows.push({ label: 'Cumpl. registros perioperatorios', key: 'qxRegistros', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Cumpl. conteo instrumental', key: 'qxConteo', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Cumpl. higiene de manos', key: 'qxHigiene', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Cumpl. posicionamiento seguro', key: 'qxPosicion', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Incid. LPP quirúrgicas', key: 'qxLPP', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Cumpl. Lista Verificación', key: 'qxLista', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Cumpl. identificación segura', key: 'qxIdentificacion', fmt: v => (v).toFixed(1)+'%' });
+                }
+                if (tipoReal === 'uci') {
+                    rows.push({ label: 'Horas Enfermería (h/pac)', key: 'horasEnfermeria', fmt: v => (v).toFixed(1) });
+                    rows.push({ label: 'Ratio día', key: 'ratioDay', fmt: v => (v).toFixed(1) });
+                    rows.push({ label: 'Ratio noche', key: 'ratioNight', fmt: v => (v).toFixed(1) });
+                    rows.push({ label: 'Tasa VAP (x1000)', key: 'tasaVAP', fmt: v => (v).toFixed(1) });
+                    rows.push({ label: 'Sedación evaluada', key: 'sedacion', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'PIC vigilada', key: 'pic', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Retiro CVC/CVP', key: 'retiroCvc', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Retiro TET', key: 'retiroTet', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Retiro SNG/SOG', key: 'retiroSng', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Retiro CUP', key: 'retiroCup', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Encuestas satisfactorias', key: 'encuestas', fmt: v => (v).toFixed(1)+'%' });
+                }
+                if (tipoReal === 'emergencia') {
+                    rows.push({ label: 'Relación Pac/Enf (global)', key: 'emerRelGlobal', fmt: v => (v).toFixed(1)+':1' });
+                    rows.push({ label: 'Relación Pac/Enf (DÍA)', key: 'emerRelDia', fmt: v => (v).toFixed(1)+':1' });
+                    rows.push({ label: 'Relación Pac/Enf (NOCHE)', key: 'emerRelNoche', fmt: v => (v).toFixed(1)+':1' });
+                    rows.push({ label: 'Cumpl. Glasgow', key: 'emerGlasgow', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Tiempo Triaje (min)', key: 'emerTriage', fmt: v => (v).toFixed(1) });
+                    rows.push({ label: 'Tiempo Trombólisis (min)', key: 'emerThrombo', fmt: v => (v).toFixed(1) });
+                    rows.push({ label: 'Incid. Caídas', key: 'emerFalls', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Cumpl. PAE', key: 'emerPAE', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Tiempo Observación (min)', key: 'emerObs', fmt: v => (v).toFixed(1) });
+                    rows.push({ label: 'Riesgo de Aspiración', key: 'emerAspiration', fmt: v => (v).toFixed(1)+'%' });
+                    rows.push({ label: 'Evaluación Conciencia', key: 'emerConciencia', fmt: v => (v).toFixed(1)+'%' });
+                }
+            }
+
+            rows.forEach(row => {
+                html += `<tr><td><strong>${row.label}</strong></td>`;
+                sortedQuarters.forEach(q => {
+                    const qData = quarterData[q];
+                    let val = qData ? (qData[row.key] !== undefined ? qData[row.key] : 0) : 0;
+                    html += `<td>${row.fmt(val)}</td>`;
+                });
+                html += `</tr>`;
+            });
+
+            html += `</tbody></table>
+                <button class="btn btn-outline-primary mt-3" onclick="copyTable()"><i class="fas fa-copy me-2"></i> Copiar Tabla</button></div>`;
+            inner.innerHTML = html;
+        }
+
+        salaSelect.addEventListener('change', updateReport);
+        document.getElementById('btnActualizarReport').addEventListener('click', updateReport);
+        updateReport();
+    }
+
+    function copyTable() {
+        const table = document.getElementById('quarterTable');
+        if (!table) return;
+        const range = document.createRange();
+        range.selectNode(table);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+        alert('Tabla copiada al portapapeles.');
+    }
+
+    // ================================================================
+    // INICIALIZACIÓN
+    // ================================================================
+    document.addEventListener('DOMContentLoaded', async function() {
+        document.getElementById('wardDisplay').innerHTML = `<i class="fas fa-chart-line me-1"></i> Jefatura (General)`;
+
+        await renderDashboard();
+        await renderComparativa();
+        await renderReport();
+
+        document.querySelector('#dashboard-tab')?.click();
+
+        document.querySelectorAll('#myTab .nav-link').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function(e) {
+                const target = this.getAttribute('data-bs-target');
+                if (target === '#comparativa') renderComparativa();
+                if (target === '#report') renderReport();
+                if (target === '#dashboard') renderDashboard();
+            });
+        });
+    });
 </script>
 </body>
 </html>
