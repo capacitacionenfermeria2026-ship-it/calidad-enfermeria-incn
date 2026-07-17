@@ -1,0 +1,25 @@
+{
+  "name": "Sistema de Indicadores de Calidad de Enfermería",
+  "short_name": "Indicadores INCN",
+  "description": "Sistema del Departamento de Enfermería del Instituto Nacional de Ciencias Neurológicas para el registro y monitoreo de indicadores de calidad.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0B4F8C",
+  "icons": [
+    {
+      "src": "icono-incn.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icono-incn.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
